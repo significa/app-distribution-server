@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+jinja2
+pyqrcode
+python-multipart
+fs
+fs-s3fs

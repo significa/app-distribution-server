@@ -4,7 +4,7 @@ import pyqrcode
 
 
 def get_qr_code_svg(qr_content):
-    url = pyqrcode.create(qr_content)
+    url = pyqrcode.create(qr_content, error="L")
 
     svg_bytes_buffer = io.BytesIO()
 
@@ -14,7 +14,7 @@ def get_qr_code_svg(qr_content):
         svgclass=None,
         lineclass=None,
         scale=5,
-        quiet_zone=2,
+        quiet_zone=0,
     )
 
     svg_content_utf8 = svg_bytes_buffer.getvalue().decode("utf-8")

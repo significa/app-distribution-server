@@ -1,9 +1,18 @@
 import plistlib
 import zipfile
+from typing import IO
+
+from pydantic import BaseModel
 
 
-def get_app_info(ipa_file_path):
-    with zipfile.ZipFile(ipa_file_path, 'r') as ipa:
+class AppInfo(BaseModel):
+    app_title: str
+    bundle_id: str
+    bundle_version: str
+
+
+def extract_app_info(ipa_file: IO[bytes]) -> AppInfo:
+    with zipfile.ZipFile(ipa_file, 'r') as ipa:
         for file in ipa.namelist():
             if file.endswith('.app/Info.plist'):
                 data = ipa.read(file)
@@ -19,6 +28,10 @@ def get_app_info(ipa_file_path):
                 ):
                     raise RuntimeError("Failed to extract plist file information")
 
-                return app_title, bundle_id, bundle_version
+                return AppInfo(
+                    app_title=app_title,
+                    bundle_id=bundle_id,
+                    bundle_version=bundle_version,
+                )
 
     raise RuntimeError("Could not find plist file in bundle")

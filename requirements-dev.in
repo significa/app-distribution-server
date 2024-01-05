@@ -1,0 +1,4 @@
+flake8
+isort
+pycodestyle
+pip-tools
