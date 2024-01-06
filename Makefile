@@ -6,21 +6,21 @@ setup-venv: ## Setup a local venv
 	python3 -m venv env
 
 install-deps: ## Install python dependencies for development
-	pip install -r requirements.txt
-	pip install -r requirements-dev.txt
+	pip install -r requirements.txt -r requirements-dev.txt
 
 dev: ## Setup a local venv
-	uvicorn src.app:app --reload
+	uvicorn --host=0.0.0.0 --port=8000 src.app:app
 
 lint: ## Ensure code properly formatted
 	pycodestyle .
 	flake8 .
 	isort . --check
+	pyright .
 
 format: ## Format the code according to the standards
 	autopep8 --recursive --in-place .
-	flake8 --format .
 	isort .
+	flake8 --format .
 
 lock-deps: ## Lock dependencies to requirements.txt
 	pip-compile requirements-dev.in

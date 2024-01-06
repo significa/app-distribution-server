@@ -2,6 +2,9 @@ from fastapi import HTTPException, status
 
 
 class APIUserError(HTTPException):
+    STATUS_CODE: int
+    ERROR_MESSAGE: str
+
     def __init__(self):
         print()
         super().__init__(

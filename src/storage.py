@@ -6,16 +6,11 @@ from fs import open_fs
 from src.apple_ipa import AppInfo
 
 STORAGE_URL = os.getenv("STORAGE_URL", "osfs://./uploads")
-APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8000")
-UPLOADS_SECRET_AUTH_TOKEN = os.getenv("UPLOADS_SECRET_AUTH_TOKEN", "password")
-UPLOADS_DIRECTORY = os.getenv("UPLOADS_DIRECTORY", "./uploads")
-UPLOADS_ROUTE_PATH = "uploads"
-APP_TITLE = "Significa IOS app distribution"
 PLIST_FILE_NAME = "info.plist"
 APP_IPA_FILE_NAME = "app.ipa"
 APP_INFO_JSON_FILE_NAME = "app_info.json"
 
-filesystem = open_fs(STORAGE_URL)
+filesystem = open_fs(STORAGE_URL, create=True)
 
 
 def create_parent_directories(upload_id: str):

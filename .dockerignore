@@ -4,3 +4,6 @@ env
 .gitignore
 
 Dockerfile
+
+docs
+images

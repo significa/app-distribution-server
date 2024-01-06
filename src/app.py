@@ -1,7 +1,6 @@
 import io
 import os
 import secrets
-from typing import Literal
 from uuid import uuid4
 
 from fastapi import FastAPI, File, Header, Request, Response, UploadFile
@@ -16,11 +15,15 @@ from src.storage import (
     upload_exists,
 )
 
+UPLOADS_SECRET_AUTH_TOKEN = os.getenv("UPLOADS_SECRET_AUTH_TOKEN", "secret")
 APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8000")
-UPLOADS_SECRET_AUTH_TOKEN = os.getenv("UPLOADS_SECRET_AUTH_TOKEN", "password")
-APP_TITLE = "Significa IOS app distribution"
+APP_VERSION = os.getenv("APP_VERSION") or "0.0.1-development"
+APP_TITLE = os.getenv("APP_TITLE") or "Significa IOS app distribution"
 
-app = FastAPI(title=APP_TITLE)
+app = FastAPI(
+    title=APP_TITLE,
+    version=APP_VERSION,
+)
 
 templates = Jinja2Templates(directory="templates")
 
@@ -35,7 +38,7 @@ def assert_upload_exists(upload_id: str):
 
 
 @app.get("/healthz")
-async def healthz() -> Literal["OK"]:
+async def healthz():
     return Response(content="OK", media_type="text/plain")
 
 
@@ -90,7 +93,7 @@ async def get_item_plist(
 @app.get("/get/{id}/app.ipa", response_class=HTMLResponse)
 async def get_app_ipa(
     id: str,
-) -> HTMLResponse:
+) -> Response:
     assert_upload_exists(id)
 
     app_ipa_file_content = load_ipa_app_file(id)
@@ -115,12 +118,12 @@ async def get_app_ipa(
 )
 async def upload_ipa(
     ipa_file: UploadFile = File(),
-    x_auth_token: str = Header()
-) -> str:
+    x_auth_token: str = Header(),
+) -> Response:
     if not secrets.compare_digest(x_auth_token, UPLOADS_SECRET_AUTH_TOKEN):
         raise UnauthorizedError()
 
-    if not ipa_file.filename.endswith(".ipa"):
+    if ipa_file.filename is None or not ipa_file.filename.endswith(".ipa"):
         raise InvalidFileTypeError()
 
     upload_id = str(uuid4())

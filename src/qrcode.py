@@ -11,8 +11,8 @@ def get_qr_code_svg(qr_content):
     url.svg(
         svg_bytes_buffer,
         xmldecl=False,
-        svgclass=None,
-        lineclass=None,
+        svgclass="",
+        lineclass="",
         scale=5,
         quiet_zone=0,
     )
