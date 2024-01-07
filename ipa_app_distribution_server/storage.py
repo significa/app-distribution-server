@@ -1,11 +1,10 @@
 import json
-import os
 
 from fs import open_fs
 
-from src.apple_ipa import AppInfo
+from ipa_app_distribution_server.apple_ipa import AppInfo
+from ipa_app_distribution_server.config import STORAGE_URL
 
-STORAGE_URL = os.getenv("STORAGE_URL", "osfs://./uploads")
 PLIST_FILE_NAME = "info.plist"
 APP_IPA_FILE_NAME = "app.ipa"
 APP_INFO_JSON_FILE_NAME = "app_info.json"

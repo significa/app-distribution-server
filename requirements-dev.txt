@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements-dev.in
 #
+add-trailing-comma==3.1.0
+    # via -r requirements-dev.in
 build==1.0.3
     # via pip-tools
 click==8.1.7
@@ -26,6 +28,8 @@ pyflakes==3.0.1
     # via flake8
 pyproject-hooks==1.0.0
     # via build
+tokenize-rt==5.2.0
+    # via add-trailing-comma
 wheel==0.42.0
     # via pip-tools
 

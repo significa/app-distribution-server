@@ -1,9 +1,10 @@
 env
-.evn
+.env
 
 .gitignore
-
 Dockerfile
 
 docs
 images
+
+uploads

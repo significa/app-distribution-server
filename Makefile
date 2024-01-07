@@ -8,8 +8,11 @@ setup-venv: ## Setup a local venv
 install-deps: ## Install python dependencies for development
 	pip install -r requirements.txt -r requirements-dev.txt
 
-dev: ## Setup a local venv
-	uvicorn --host=0.0.0.0 --port=8000 src.app:app
+start: ## Start a production like server
+	uvicorn --host=0.0.0.0 --port=8000 ipa_app_distribution_server.app:app
+
+dev: ## Start the local developent server
+	uvicorn --host=0.0.0.0 --port=8000 ipa_app_distribution_server.app:app --reload
 
 lint: ## Ensure code properly formatted
 	pycodestyle .
@@ -18,9 +21,10 @@ lint: ## Ensure code properly formatted
 	pyright .
 
 format: ## Format the code according to the standards
+	find . -name '*.py' -not -path "./env/*" -exec add-trailing-comma {} +
 	autopep8 --recursive --in-place .
 	isort .
-	flake8 --format .
+	flake8 --show-source --format .
 
 lock-deps: ## Lock dependencies to requirements.txt
 	pip-compile requirements-dev.in

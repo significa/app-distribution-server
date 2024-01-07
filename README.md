@@ -56,11 +56,12 @@ More documentation in the Swagger OpenAPI explorer available on `/docs`.
 - `STORAGE_URL`: A [PyFilesystem2](https://github.com/PyFilesystem/pyfilesystem2) compatible URL.
   Defaults to `osfs:///uploads` for Docker installations, and `osfs://./uploads` when running
   directly with Python. This means `/uploads` and `./uploads` respectively.  
+
   Compatible with many storage backends. Check out the possible configurations in the
   [index of filesystems](https://www.pyfilesystem.org/page/index-of-filesystems/).
-
-AWS S3 Example: `s3://your-bucket-name` (and then provide the credentials via the usual `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`).
-
+  
+  AWS S3 Example: `s3://your-bucket-name` (and then provide the credentials via the usual
+  `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`).
 
 ## Development
 
@@ -69,16 +70,16 @@ AWS S3 Example: `s3://your-bucket-name` (and then provide the credentials via th
 - Python 3.11
 - Make tools
 
-**Useful commands**:
+**Useful development commands**:
 
-- Setup a virtual environment (ex: `setup-venv`).
+- Setup a virtual environment (ex: `make setup-venv`).
 
-- Install the dependencies: `install-deps`.
+- Install the dependencies: `make install-deps`.
 
-- Start the development server: `make dev`  
-  Open the interactive OpenAPI explorer: http://localhost:3000/docs
+- Start the development server: `make dev`.  
+  Open the interactive OpenAPI explorer: http://localhost:3000/docs.
 
-- When changes to the dependencies are made, freeze them in the lockfile with: `lock-deps`
+- When changes to the dependencies are made, freeze them in the lockfile with: `make lock-deps`.
 
 ## License
 

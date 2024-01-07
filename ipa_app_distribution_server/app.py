@@ -1,28 +1,30 @@
 import io
-import os
 import secrets
 from uuid import uuid4
+from venv import logger
 
 from fastapi import FastAPI, File, Header, Request, Response, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from src.apple_ipa import extract_app_info
-from src.errors import InvalidFileTypeError, NotFoundError, UnauthorizedError
-from src.qrcode import get_qr_code_svg
-from src.storage import (
+from ipa_app_distribution_server.apple_ipa import extract_app_info
+from ipa_app_distribution_server.config import (
+    APP_BASE_URL, APP_TITLE, APP_VERSION, UPLOADS_SECRET_AUTH_TOKEN,
+)
+from ipa_app_distribution_server.errors import (
+    InvalidFileTypeError, NotFoundError, UnauthorizedError,
+)
+from ipa_app_distribution_server.qrcode import get_qr_code_svg
+from ipa_app_distribution_server.storage import (
     create_parent_directories, load_app_info, load_ipa_app_file, save_app_info, save_ipa_app_file,
     upload_exists,
 )
 
-UPLOADS_SECRET_AUTH_TOKEN = os.getenv("UPLOADS_SECRET_AUTH_TOKEN", "secret")
-APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8000")
-APP_VERSION = os.getenv("APP_VERSION") or "0.0.1-development"
-APP_TITLE = os.getenv("APP_TITLE") or "Significa IOS app distribution"
-
 app = FastAPI(
     title=APP_TITLE,
     version=APP_VERSION,
+    summary="Simple, self-hosted IPA app distribution server.",
+    description="[Source code/issues](https://github.com/significa/ios-ipa-app-distribution)",
 )
 
 templates = Jinja2Templates(directory="templates")
@@ -109,12 +111,12 @@ async def get_app_ipa(
     "/upload",
     responses={
         InvalidFileTypeError.STATUS_CODE: {
-            "description": InvalidFileTypeError.ERROR_MESSAGE
+            "description": InvalidFileTypeError.ERROR_MESSAGE,
         },
         UnauthorizedError.STATUS_CODE: {
-            "description": UnauthorizedError.ERROR_MESSAGE
-        }
-    }
+            "description": UnauthorizedError.ERROR_MESSAGE,
+        },
+    },
 )
 async def upload_ipa(
     ipa_file: UploadFile = File(),
@@ -128,6 +130,8 @@ async def upload_ipa(
 
     upload_id = str(uuid4())
 
+    logger.debug(f"Starting upload {upload_id!r}")
+
     ipa_file_content = ipa_file.file.read()
     app_info = extract_app_info(io.BytesIO(ipa_file_content))
 
@@ -136,7 +140,9 @@ async def upload_ipa(
     save_app_info(upload_id, app_info)
     save_ipa_app_file(upload_id, ipa_file_content)
 
+    logger.info(f"Upload {app_info.bundle_id!r} ({upload_id!r}) complete")
+
     return Response(
         content=get_absolute_url(f"/get/{upload_id}"),
-        media_type="text/plain"
+        media_type="text/plain",
     )

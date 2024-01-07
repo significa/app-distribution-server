@@ -39,7 +39,7 @@ jobs:
         id: docker_metadata
         uses: docker/metadata-action@v4
         with:
-          images: ghcr.io/significa/simple-ios-ipa-app-distribution
+          images: ghcr.io/significa/ipa-app-distribution-server
           tags: |
             type=sha
             type=ref,event=branch

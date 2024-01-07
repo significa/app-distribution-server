@@ -1,4 +1,5 @@
+add-trailing-comma
 flake8
 isort
-pycodestyle
 pip-tools
+pycodestyle

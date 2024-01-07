@@ -1,7 +1,7 @@
 fastapi
-uvicorn
+fs
+fs-s3fs
 jinja2
 pyqrcode
 python-multipart
-fs
-fs-s3fs
+uvicorn
