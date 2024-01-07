@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-    tags: '*'
   pull_request:
   release:
     types:
@@ -53,10 +52,12 @@ jobs:
         shell: bash
         run: |
           if [[ "$IS_PRODUCTION" == "true" ]]; then
-           echo "version=$(echo ${{ github.ref_name }} | sed -e 's/^v//')" >> "$GITHUB_OUTPUT"
+            version=$(echo ${{ github.ref_name }} | sed -e 's/^v//')
           else
-            echo "version=$(echo 0.0.1-${{ github.sha }})" >> "$GITHUB_OUTPUT"
-           fi
+            version="0.0.1-${{ github.sha }}"
+          fi
+          echo "version=$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
         env:
           IS_PRODUCTION: ${{ (github.event_name == 'release' || github.event_name == 'workflow_dispatch') && github.ref_type == 'tag' && startsWith(github.ref_name, 'v')}}
 
@@ -66,7 +67,7 @@ jobs:
         with:
           context: ./
           file: ./Dockerfile
-          platforms: linux/amd64, linux/arm64/v8
+          platforms: linux/amd64, linux/arm64
           push: true
           tags: ${{ steps.docker_metadata.outputs.tags }}
           labels: ${{ steps.docker_metadata.outputs.labels }}

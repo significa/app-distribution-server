@@ -26,8 +26,8 @@ To run with Docker:
 ```sh
 docker run \
   -p 8000:8000 \
-  -v ios-ipa-uploads:/uploads \
-  -it ghcr.io/significa/ios-ipa-app-distribution
+  -v ipa-uploads:/uploads \
+  -it ghcr.io/significa/ipa-app-distribution-server
 ```
 
 To upload your first IPA app build (`your-app-build.ipa` in the working directory):
