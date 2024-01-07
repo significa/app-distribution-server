@@ -1,4 +1,4 @@
-# Simple iOS IPA App Distribution Site
+# Simple iOS IPA App Distribution Server
 
 This is a simple, self-hosted IPA app distribution server.
 
