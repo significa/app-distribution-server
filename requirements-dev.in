@@ -1,5 +1,5 @@
-add-trailing-comma
-flake8
-isort
-pip-tools
-pycodestyle
+add-trailing-comma==3.1.0
+flake8==6.0.0
+isort==5.12.0
+pip-tools==7.3.0
+pycodestyle==2.10.0

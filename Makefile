@@ -3,7 +3,7 @@ help: ## Show this help
 	awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-21s\033[0m %s\n", $$1, $$2}'
 
 setup-venv: ## Setup a local venv
-	python3 -m venv env
+	python3 -m venv venv
 
 install-deps: ## Install python dependencies for development
 	pip install -r requirements.txt -r requirements-dev.txt
@@ -27,5 +27,5 @@ format: ## Format the code according to the standards
 	flake8 --show-source --format .
 
 lock-deps: ## Lock dependencies to requirements.txt
-	pip-compile requirements-dev.in
-	pip-compile requirements.in
+	pip-compile --strip-extras requirements-dev.in > requirements-dev.txt
+	pip-compile --strip-extras requirements.in > requirements.txt
