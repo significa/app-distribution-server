@@ -21,7 +21,7 @@ lint: ## Ensure code properly formatted
 	pyright .
 
 format: ## Format the code according to the standards
-	find . -name '*.py' -not -path "./env/*" -exec add-trailing-comma {} +
+	find . -name '*.py' -not -path "./venv/*" -exec add-trailing-comma {} +
 	autopep8 --recursive --in-place .
 	isort .
 	flake8 --show-source --format .

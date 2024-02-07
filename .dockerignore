@@ -1,4 +1,4 @@
-env
+venv
 .env
 
 .gitignore
