@@ -14,17 +14,14 @@ start: ## Start a production like server
 dev: ## Start the local developent server
 	uvicorn --host=0.0.0.0 --port=8000 ipa_app_distribution_server.app:app --reload
 
-lint: ## Ensure code properly formatted
-	pycodestyle .
-	flake8 .
-	isort . --check
+lint: ## Lint the code according to the standards
+	ruff check .
+	ruff format --check .
 	pyright .
 
 format: ## Format the code according to the standards
-	find . -name '*.py' -not -path "./venv/*" -exec add-trailing-comma {} +
-	autopep8 --recursive --in-place .
-	isort .
-	flake8 --show-source --format .
+	ruff check --fix .
+	ruff format .
 
 lock-deps: ## Lock dependencies to requirements.txt
 	pip-compile --strip-extras requirements-dev.in > requirements-dev.txt

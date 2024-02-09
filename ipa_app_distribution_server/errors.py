@@ -6,7 +6,6 @@ class APIUserError(HTTPException):
     ERROR_MESSAGE: str
 
     def __init__(self):
-        print()
         super().__init__(
             status_code=self.STATUS_CODE,
             detail=self.ERROR_MESSAGE,

@@ -17,11 +17,7 @@ def extract_app_info_from_plist_content(plist_file_content):
     app_title = info.get("CFBundleName")
     bundle_version = info.get("CFBundleShortVersionString")
 
-    if (
-        bundle_id is None
-        or app_title is None
-        or bundle_version is None
-    ):
+    if bundle_id is None or app_title is None or bundle_version is None:
         raise RuntimeError("Failed to extract plist file information")
 
     return AppInfo(

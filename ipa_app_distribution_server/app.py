@@ -9,14 +9,23 @@ from fastapi.templating import Jinja2Templates
 
 from ipa_app_distribution_server.apple_ipa import extract_app_info
 from ipa_app_distribution_server.config import (
-    APP_BASE_URL, APP_TITLE, APP_VERSION, UPLOADS_SECRET_AUTH_TOKEN,
+    APP_BASE_URL,
+    APP_TITLE,
+    APP_VERSION,
+    UPLOADS_SECRET_AUTH_TOKEN,
 )
 from ipa_app_distribution_server.errors import (
-    InvalidFileTypeError, NotFoundError, UnauthorizedError,
+    InvalidFileTypeError,
+    NotFoundError,
+    UnauthorizedError,
 )
 from ipa_app_distribution_server.qrcode import get_qr_code_svg
 from ipa_app_distribution_server.storage import (
-    create_parent_directories, load_app_info, load_ipa_app_file, save_app_info, save_ipa_app_file,
+    create_parent_directories,
+    load_app_info,
+    load_ipa_app_file,
+    save_app_info,
+    save_ipa_app_file,
     upload_exists,
 )
 
@@ -75,7 +84,6 @@ async def get_item_plist(
     request: Request,
     id: str,
 ) -> HTMLResponse:
-    print(id)
     assert_upload_exists(id)
 
     app_info = load_app_info(id)

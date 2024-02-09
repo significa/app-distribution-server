@@ -1,5 +1,3 @@
-add-trailing-comma==3.1.0
-flake8==6.0.0
-isort==5.12.0
 pip-tools==7.3.0
-pycodestyle==2.10.0
+pyright==1.1.350
+ruff==0.2.1

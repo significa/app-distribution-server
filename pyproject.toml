@@ -1,0 +1,43 @@
+[tool.ruff]
+line-length = 100
+indent-width = 4
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.ruff.lint]
+select = [
+  "C",
+  "DTZ",
+  "E",
+  "F",
+  "FLY",
+  "G002",
+  "G003",
+  "G010",
+  "G101",
+  "I",
+  "N",
+  "PL",
+  "Q",
+  "RET",
+  "RUF",
+  "S",
+  "T10",
+  "T20",
+  "UP",
+  "W",
+]
+ignore = [
+  "N805",
+  "PLR0912",
+  "PLR0913",
+  "RUF100",
+  "S101",
+  "S104",
+]
+fixable = ["ALL"]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120
