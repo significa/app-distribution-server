@@ -4,6 +4,9 @@ from typing import IO
 
 from pydantic import BaseModel
 
+from ipa_app_distribution_server.errors import InvalidFileTypeError
+from ipa_app_distribution_server.logger import logger
+
 
 class AppInfo(BaseModel):
     app_title: str
@@ -18,7 +21,8 @@ def extract_app_info_from_plist_content(plist_file_content):
     bundle_version = info.get("CFBundleShortVersionString")
 
     if bundle_id is None or app_title is None or bundle_version is None:
-        raise RuntimeError("Failed to extract plist file information")
+        logger.error("Failed to extract plist file information")
+        raise InvalidFileTypeError()
 
     return AppInfo(
         app_title=app_title,
@@ -34,4 +38,5 @@ def extract_app_info(ipa_file: IO[bytes]) -> AppInfo:
                 data = ipa.read(file)
                 return extract_app_info_from_plist_content(data)
 
-    raise RuntimeError("Could not find plist file in bundle")
+    logger.error("Could not find plist file in bundle")
+    raise InvalidFileTypeError()
