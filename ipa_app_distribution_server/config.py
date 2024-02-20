@@ -16,4 +16,4 @@ if not UPLOADS_SECRET_AUTH_TOKEN:
 
 APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8000")
 APP_VERSION = os.getenv("APP_VERSION") or "0.0.1-development"
-APP_TITLE = os.getenv("APP_TITLE") or "Significa IOS app distribution"
+APP_TITLE = os.getenv("APP_TITLE") or "IOS ipa app distribution server"
