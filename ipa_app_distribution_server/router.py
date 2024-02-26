@@ -53,7 +53,7 @@ def assert_upload_exists(upload_id: str):
         },
     },
     tags=["Upload API"],
-    description="Upload an iOS IPA APP Build",
+    summary="Upload an iOS IPA APP Build",
 )
 async def upload_ipa(
     ipa_file: UploadFile = File(),
@@ -89,7 +89,7 @@ async def upload_ipa(
     "/get/{id}",
     response_class=HTMLResponse,
     tags=["Static page handling"],
-    description="Render the HTML installation page for the specified item ID.",
+    summary="Render the HTML installation page for the specified item ID.",
 )
 async def get_item_installation_page(
     request: Request,
