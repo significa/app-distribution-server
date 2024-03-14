@@ -6,7 +6,6 @@ class APIUserError(HTTPException):
     ERROR_MESSAGE: str
 
     def __init__(self):
-        print()
         super().__init__(
             status_code=self.STATUS_CODE,
             detail=self.ERROR_MESSAGE,
@@ -14,7 +13,7 @@ class APIUserError(HTTPException):
 
 
 class InvalidFileTypeError(APIUserError):
-    ERROR_MESSAGE = "Invalid file type. Only .ipa files are allowed."
+    ERROR_MESSAGE = "Invalid file type. Only valid .ipa files are allowed."
     STATUS_CODE = status.HTTP_400_BAD_REQUEST
 
 

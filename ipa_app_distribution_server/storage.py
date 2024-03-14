@@ -18,7 +18,7 @@ def create_parent_directories(upload_id: str):
 
 def upload_exists(upload_id: str):
     return (
-        filesystem.exists(f"{upload_id}/{APP_IPA_FILE_NAME}")
+        filesystem.exists(f"{upload_id}/{APP_IPA_FILE_NAME}")  # fmt: skip
         and filesystem.exists(f"{upload_id}/{APP_INFO_JSON_FILE_NAME}")
     )
 

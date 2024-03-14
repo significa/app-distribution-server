@@ -10,9 +10,9 @@ anyio==4.2.0
     # via starlette
 appdirs==1.4.4
     # via fs
-boto3==1.34.35
+boto3==1.34.38
     # via fs-s3fs
-botocore==1.34.35
+botocore==1.34.38
     # via
     #   boto3
     #   s3transfer

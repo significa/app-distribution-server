@@ -9,15 +9,16 @@ Developers can perform internal builds on their computers (without using a servi
 and utilize this platform to easily distribute the build among other developers, testers,
 or clients.
 
-The project provides a single endpoint for uploading an iOS `.ipa` app build. After upload, it
-automatically generates a minimalistic installation page with a QR code
+We have written a blog post about this project, it explains the why and has a walkthrough on how to
+use/deploy it: [How to distribute iOS IPA builds][blog post].
+
+The project provides a single endpoint for uploading an `.ipa` build. It returns a publicly
+accessible, minimalistic installation page with a QR code - that simple. It is designed for easy
+deployment within your infrastructure via a Docker container. And the upload functionality is
+secured with a pre-shared authorization token (see "Configuration" below).
 
 To maintain simplicity and focus, this project **does not** handle device ID registration or
 application building.
-
-It is designed for easy deployment within your infrastructure.
-
-The upload functionality is secured with an authorization token (see "Configuration" below).
 
 ## Usage
 
@@ -88,3 +89,6 @@ GNU GPLv3
 ---
 
 Built by [Significa](https://significa.co)
+
+
+[Blog post]: https://significa.co/blog/how-to-distribute-ios-ipa-builds
