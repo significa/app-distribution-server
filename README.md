@@ -9,8 +9,8 @@ Developers can perform internal builds on their computers (without using a servi
 and utilize this platform to easily distribute the build among other developers, testers,
 or clients.
 
-We have written a blog post about this project, it explains the why and has a walkthrough on how to
-use/deploy it: [How to distribute iOS IPA builds][blog post].
+We wrote a blog post about this project, it explains the 'Why' and has a walkthrough on how to
+use/deploy it (more 'How-to' style): [How to distribute iOS IPA builds][blog post].
 
 The project provides a single endpoint for uploading an `.ipa` build. It returns a publicly
 accessible, minimalistic installation page with a QR code - that simple. It is designed for easy
