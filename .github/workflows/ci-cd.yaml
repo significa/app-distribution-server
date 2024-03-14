@@ -1,0 +1,39 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12	'
+          cache: 'pip'
+
+      - run: make install-deps
+
+      - run: make lint
+
+  build_and_push:
+    name: Build and push image
+    needs:
+      - lint
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    uses: significa/actions/.github/workflows/docker-image.yaml@main
+    with:
+      image_name: ipa-app-distribution-server
