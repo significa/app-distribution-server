@@ -27,6 +27,8 @@ jobs:
 
   build_and_push:
     name: Build and push image
+    needs:
+      - lint
     permissions:
       contents: read
       id-token: write
