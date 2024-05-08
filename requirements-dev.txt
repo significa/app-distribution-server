@@ -4,23 +4,25 @@
 #
 #    pip-compile --strip-extras requirements-dev.in
 #
-build==1.0.3
+build==1.2.1
     # via pip-tools
 click==8.1.7
     # via pip-tools
 nodeenv==1.8.0
     # via pyright
-packaging==23.2
+packaging==24.0
     # via build
-pip-tools==7.3.0
+pip-tools==7.4.1
     # via -r requirements-dev.in
-pyproject-hooks==1.0.0
-    # via build
-pyright==1.1.350
+pyproject-hooks==1.1.0
+    # via
+    #   build
+    #   pip-tools
+pyright==1.1.362
     # via -r requirements-dev.in
-ruff==0.2.1
+ruff==0.4.3
     # via -r requirements-dev.in
-wheel==0.42.0
+wheel==0.43.0
     # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
