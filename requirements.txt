@@ -119,7 +119,7 @@ typing-extensions==4.11.0
     #   typer
 ujson==5.9.0
     # via fastapi
-urllib3==2.2.1
+urllib3==2.2.2
     # via botocore
 uvicorn==0.29.0
     # via
