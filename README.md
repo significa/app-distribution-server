@@ -35,7 +35,7 @@ To upload your first IPA app build (`your-app-build.ipa` in the working director
 
 ```
 curl -X "POST" \
-  "http://localhost:3000/upload" \
+  "http://localhost:8000/upload" \
   -H "Accept: application/json" \
   -H "X-Auth-Token: secret" \
   -H "Content-Type: multipart/form-data" \
