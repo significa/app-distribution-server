@@ -1,5 +1,6 @@
 import plistlib
 import zipfile
+from datetime import datetime
 from typing import IO
 
 from pydantic import BaseModel
@@ -12,6 +13,7 @@ class AppInfo(BaseModel):
     app_title: str
     bundle_id: str
     bundle_version: str
+    created_at: datetime = datetime.now()
 
 
 def extract_app_info_from_plist_content(plist_file_content):

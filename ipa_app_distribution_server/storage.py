@@ -37,6 +37,13 @@ def save_app_info(upload_id: str, app_info: AppInfo):
         app_info_file.write(app_info.model_dump_json())
 
 
+def list_all_app_info() -> list[tuple[str, AppInfo]]:
+    app_info_list = []
+    for upload_id in filesystem.listdir(""):
+        app_info_list.append((upload_id, load_app_info(upload_id)))
+    return app_info_list
+
+
 def load_app_info(upload_id: str) -> AppInfo:
     filepath = f"{upload_id}/{APP_INFO_JSON_FILE_NAME}"
 

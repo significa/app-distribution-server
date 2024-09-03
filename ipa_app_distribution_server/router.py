@@ -21,6 +21,7 @@ from ipa_app_distribution_server.errors import (
 from ipa_app_distribution_server.qrcode import get_qr_code_svg
 from ipa_app_distribution_server.storage import (
     create_parent_directories,
+    list_all_app_info,
     load_app_info,
     load_ipa_app_file,
     save_app_info,
@@ -101,6 +102,8 @@ async def get_item_installation_page(
     install_url = f"itms-services://?action=download-manifest&url={plist_url}"
 
     app_info = load_app_info(id)
+    # 2022-01-01 00:00:00
+    create_at = app_info.created_at.strftime("%Y-%m-%d %H:%M:%S")
 
     return templates.TemplateResponse(
         request=request,
@@ -108,6 +111,7 @@ async def get_item_installation_page(
         context={
             "page_title": f"{app_info.app_title} @{app_info.bundle_version} - {APP_TITLE}",
             "app_title": app_info.app_title,
+            "create_at": create_at,
             "bundle_id": app_info.bundle_id,
             "bundle_version": app_info.bundle_version,
             "install_url": install_url,
@@ -158,6 +162,31 @@ async def get_app_ipa(
         media_type="application/octet-stream",
         headers={"Content-Disposition": "attachment; filename=app.ipa"},
     )
+
+
+@router.get(
+    "/{bundle_id}/latest",
+    response_class=HTMLResponse,
+    tags=["Static page handling"],
+)
+async def get_latest_installation_page(
+    bundle_id: str,
+    request: Request,
+) -> HTMLResponse:
+    upload_id = await load_latest_upload_id(bundle_id)
+    assert_upload_exists(upload_id)
+
+    return await get_item_installation_page(request, upload_id)
+
+
+async def load_latest_upload_id(bundle_id: str) -> str:
+    all_uploads = list_all_app_info()
+    all_uploads.sort(key=lambda x: x[1].created_at)
+    latest = list(filter(lambda x: x[1].bundle_id == bundle_id, all_uploads))
+    if not latest:
+        raise NotFoundError()
+    id = latest[-1][0]
+    return id
 
 
 @router.get(
