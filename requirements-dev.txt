@@ -8,9 +8,9 @@ build==1.2.1
     # via pip-tools
 click==8.1.7
     # via pip-tools
-nodeenv==1.8.0
+nodeenv==1.9.1
     # via pyright
-packaging==24.0
+packaging==24.1
     # via build
 pip-tools==7.4.1
     # via -r requirements-dev.in
@@ -18,11 +18,11 @@ pyproject-hooks==1.1.0
     # via
     #   build
     #   pip-tools
-pyright==1.1.362
+pyright==1.1.379
     # via -r requirements-dev.in
-ruff==0.4.3
+ruff==0.6.3
     # via -r requirements-dev.in
-wheel==0.43.0
+wheel==0.44.0
     # via pip-tools
 
 # The following packages are considered to be unsafe in a requirements file:
