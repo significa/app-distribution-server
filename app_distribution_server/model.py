@@ -1,6 +1,7 @@
 import plistlib
 import zipfile
 from datetime import datetime
+from enum import Enum
 from io import BytesIO
 
 from pydantic import BaseModel
@@ -34,9 +35,29 @@ class AppInfo(BaseModel):
 
 
 class BuildInfo(BaseModel):
+    class Platform(str, Enum):
+        ios = "ios"
+        android = "android"
+
+        @property
+        def display_name(self):
+            match = {
+                self.ios: "iOS",
+                self.android: "Android",
+            }
+            return match.get(self)
+
     build_id: str
     created_at: datetime
     app_info: AppInfo
+
+    @property
+    def platform(self) -> Platform:
+        if self.build_id.startswith("ios"):
+            return BuildInfo.Platform.ios
+        if self.build_id.startswith("android"):
+            return BuildInfo.Platform.android
+        raise ValueError("Unknown platform")
 
 
 def extract_app_info_from_plist_content(plist_file_content):

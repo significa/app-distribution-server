@@ -142,6 +142,7 @@ async def get_item_installation_page(
             "qr_code_svg": get_qr_code_svg(install_url),
             "logo_url": logo_url,
             "file_size": app_info.display_file_size,
+            "platform": build_info.platform.display_name,
         },
     )
 
