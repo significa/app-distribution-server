@@ -1,7 +1,7 @@
-fastapi==0.111.0
+fastapi==0.112.3
 fs==2.4.16
 fs-s3fs==1.1.1
 jinja2==3.1.4
 pyqrcode==1.2.1
 python-multipart==0.0.9
-uvicorn==0.29.0
+uvicorn==0.30.6

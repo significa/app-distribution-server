@@ -4,39 +4,22 @@
 #
 #    pip-compile --strip-extras requirements.in
 #
-annotated-types==0.6.0
+annotated-types==0.7.0
     # via pydantic
-anyio==4.3.0
-    # via
-    #   httpx
-    #   starlette
-    #   watchfiles
+anyio==4.4.0
+    # via starlette
 appdirs==1.4.4
     # via fs
-boto3==1.34.100
+boto3==1.35.12
     # via fs-s3fs
-botocore==1.34.100
+botocore==1.35.12
     # via
     #   boto3
     #   s3transfer
-certifi==2024.7.4
-    # via
-    #   httpcore
-    #   httpx
 click==8.1.7
-    # via
-    #   typer
-    #   uvicorn
-dnspython==2.6.1
-    # via email-validator
-email-validator==2.1.1
-    # via fastapi
-fastapi==0.111.0
-    # via
-    #   -r requirements.in
-    #   fastapi-cli
-fastapi-cli==0.0.3
-    # via fastapi
+    # via uvicorn
+fastapi==0.112.3
+    # via -r requirements.in
 fs==2.4.16
     # via
     #   -r requirements.in
@@ -44,94 +27,47 @@ fs==2.4.16
 fs-s3fs==1.1.1
     # via -r requirements.in
 h11==0.14.0
-    # via
-    #   httpcore
-    #   uvicorn
-httpcore==1.0.5
-    # via httpx
-httptools==0.6.1
     # via uvicorn
-httpx==0.27.0
-    # via fastapi
-idna==3.7
-    # via
-    #   anyio
-    #   email-validator
-    #   httpx
+idna==3.8
+    # via anyio
 jinja2==3.1.4
-    # via
-    #   -r requirements.in
-    #   fastapi
+    # via -r requirements.in
 jmespath==1.0.1
     # via
     #   boto3
     #   botocore
-markdown-it-py==3.0.0
-    # via rich
 markupsafe==2.1.5
     # via jinja2
-mdurl==0.1.2
-    # via markdown-it-py
-orjson==3.10.3
+pydantic==2.8.2
     # via fastapi
-pydantic==2.7.1
-    # via fastapi
-pydantic-core==2.18.2
+pydantic-core==2.20.1
     # via pydantic
-pygments==2.18.0
-    # via rich
 pyqrcode==1.2.1
     # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via botocore
-python-dotenv==1.0.1
-    # via uvicorn
 python-multipart==0.0.9
-    # via
-    #   -r requirements.in
-    #   fastapi
-pyyaml==6.0.1
-    # via uvicorn
-rich==13.7.1
-    # via typer
-s3transfer==0.10.1
+    # via -r requirements.in
+s3transfer==0.10.2
     # via boto3
-shellingham==1.5.4
-    # via typer
 six==1.16.0
     # via
     #   fs
     #   fs-s3fs
     #   python-dateutil
 sniffio==1.3.1
-    # via
-    #   anyio
-    #   httpx
-starlette==0.37.2
+    # via anyio
+starlette==0.38.4
     # via fastapi
-typer==0.12.3
-    # via fastapi-cli
-typing-extensions==4.11.0
+typing-extensions==4.12.2
     # via
     #   fastapi
     #   pydantic
     #   pydantic-core
-    #   typer
-ujson==5.9.0
-    # via fastapi
 urllib3==2.2.2
     # via botocore
-uvicorn==0.29.0
-    # via
-    #   -r requirements.in
-    #   fastapi
-    #   fastapi-cli
-uvloop==0.19.0
-    # via uvicorn
-watchfiles==0.21.0
-    # via uvicorn
-websockets==12.0
-    # via uvicorn
+uvicorn==0.30.6
+    # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
