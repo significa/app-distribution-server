@@ -1,3 +1,6 @@
 venv
+.venv
 .env
 uploads
+builds
+*.pyc
