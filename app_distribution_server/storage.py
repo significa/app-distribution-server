@@ -3,7 +3,7 @@ import json
 from fs import errors, open_fs, path
 
 from app_distribution_server.config import STORAGE_URL
-from app_distribution_server.model import BuildInfo, LegacyAppInfo, Platform
+from app_distribution_server.mobile_builds import BuildInfo, LegacyAppInfo, Platform
 
 PLIST_FILE_NAME = "info.plist"
 

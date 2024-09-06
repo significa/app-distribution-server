@@ -17,7 +17,7 @@ from app_distribution_server.errors import (
     NotFoundError,
     UnauthorizedError,
 )
-from app_distribution_server.model import (
+from app_distribution_server.mobile_builds import (
     Platform,
     get_build_info,
 )
