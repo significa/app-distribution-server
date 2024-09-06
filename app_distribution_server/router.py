@@ -1,7 +1,5 @@
-import io
 import secrets
-from datetime import datetime, timezone
-from uuid import uuid4
+from typing import Literal
 from venv import logger
 
 from fastapi import APIRouter, File, Header, Request, Response, UploadFile
@@ -20,16 +18,13 @@ from app_distribution_server.errors import (
     UnauthorizedError,
 )
 from app_distribution_server.model import (
-    BuildInfo,
     Platform,
-    extract_android_app_info,
-    extract_ipa_info,
+    get_build_info,
 )
 from app_distribution_server.qrcode import get_qr_code_svg
 from app_distribution_server.storage import (
-    build_exists,
     create_parent_directories,
-    list_all_build_info,
+    get_upload_platform,
     load_app_file,
     load_build_info,
     save_app_file,
@@ -45,9 +40,22 @@ def get_absolute_url(path: str) -> str:
     return f"{APP_BASE_URL}{path}"
 
 
-def assert_build_exists(build_id: str):
-    if not build_exists(build_id):
+def get_asserted_platform(
+    upload_id: str,
+    expected_platform: Platform | None = None,
+) -> Platform:
+    upload_platform = get_upload_platform(upload_id)
+
+    if upload_platform is None:
         raise NotFoundError()
+
+    if expected_platform is None:
+        return upload_platform
+
+    if upload_platform == expected_platform:
+        return upload_platform
+
+    raise NotFoundError()
 
 
 @router.post(
@@ -84,145 +92,108 @@ async def upload_app(
     else:
         raise InvalidFileTypeError()
 
-    build_id = f"{platform.value}-{uuid4()}"
-    logger.debug(f"Starting upload {build_id!r}")
-
     app_file_content = app_file.file.read()
 
-    if platform == Platform.ios:
-        app_info = extract_ipa_info(io.BytesIO(app_file_content))
-    else:
-        app_info = extract_android_app_info(io.BytesIO(app_file_content))
+    build_info = get_build_info(platform, app_file_content)
+    upload_id = build_info.upload_id
 
-    create_parent_directories(build_id)
-    build_info = BuildInfo(
-        build_id=build_id,
-        created_at=datetime.now(timezone.utc),
-        app_info=app_info,
-    )
+    logger.debug(f"Starting upload of {upload_id!r}")
+
+    create_parent_directories(build_info.upload_id)
     save_build_info(build_info)
-    save_app_file(build_id, app_file_content)
+    save_app_file(build_info, app_file_content)
 
-    logger.info(f"Upload {app_info.bundle_id!r} ({build_id!r}) complete")
+    logger.info(f"Upload {build_info.bundle_id!r} ({upload_id!r}) complete")
 
     return Response(
-        content=get_absolute_url(f"/get/{build_id}"),
+        content=get_absolute_url(f"/get/{upload_id}"),
         media_type="text/plain",
     )
 
 
 @router.get(
-    "/get/{id}",
+    "/get/{upload_id}",
     response_class=HTMLResponse,
     tags=["Static page handling"],
     summary="Render the HTML installation page for the specified item ID.",
 )
 async def get_item_installation_page(
     request: Request,
-    id: str,
+    upload_id: str,
 ) -> HTMLResponse:
-    assert_build_exists(id)
+    platform = get_asserted_platform(upload_id)
 
-    is_ios = id.startswith("ios-")
-    if is_ios:
-        plist_url = get_absolute_url(f"/get/{id}/app.plist")
+    if platform == Platform.ios:
+        plist_url = get_absolute_url(f"/get/{upload_id}/app.plist")
         install_url = f"itms-services://?action=download-manifest&url={plist_url}"
     else:
-        install_url = get_absolute_url(f"/get/{id}/app.apk")
+        install_url = get_absolute_url(f"/get/{upload_id}/app.apk")
 
-    build_info = load_build_info(id)
-    app_info = build_info.app_info
+    build_info = load_build_info(upload_id)
 
     return templates.TemplateResponse(
         request=request,
         name="download-page.html",
         context={
-            "page_title": f"{app_info.app_title} @{app_info.bundle_version} - {APP_TITLE}",
-            "app_title": app_info.app_title,
-            "created_at": build_info.created_at,
-            "bundle_id": app_info.bundle_id,
-            "bundle_version": app_info.bundle_version,
+            "page_title": f"{build_info.app_title} @{build_info.bundle_version} - {APP_TITLE}",
+            "build_info": build_info,
             "install_url": install_url,
             "qr_code_svg": get_qr_code_svg(install_url),
             "logo_url": LOGO_URL,
-            "file_size": app_info.display_file_size,
-            "platform": build_info.platform.display_name,
         },
     )
 
 
 @router.get(
-    "/get/{id}/app.plist",
+    "/get/{upload_id}/app.plist",
     response_class=HTMLResponse,
     tags=["Static page handling"],
 )
 async def get_item_plist(
     request: Request,
-    id: str,
+    upload_id: str,
 ) -> HTMLResponse:
-    assert_build_exists(id)
+    get_asserted_platform(
+        upload_id,
+        expected_platform=Platform.ios,
+    )
 
-    app_info = load_build_info(id).app_info
+    build_info = load_build_info(upload_id)
 
     return templates.TemplateResponse(
         request=request,
         name="plist.xml",
         context={
-            "ipa_file_url": get_absolute_url(f"/get/{id}/app.ipa"),
-            "app_title": app_info.app_title,
-            "bundle_id": app_info.bundle_id,
-            "bundle_version": app_info.bundle_version,
+            "ipa_file_url": get_absolute_url(f"/get/{upload_id}/app.ipa"),
+            "app_title": build_info.app_title,
+            "bundle_id": build_info.bundle_id,
+            "bundle_version": build_info.bundle_version,
         },
     )
 
 
 @router.get(
-    "/get/{id}/app.{file_type}",
+    "/get/{upload_id}/app.{file_type}",
     response_class=HTMLResponse,
     tags=["Static page handling"],
 )
-async def get_app_file(
-    id: str,
-    file_type: str,
-) -> Response:
-    assert_build_exists(id)
-    allowed_file_types = ["ipa", "apk"]
-    if file_type not in allowed_file_types:
-        raise InvalidFileTypeError()
+async def get_app_file(upload_id: str, file_type: Literal["ipa", "apk"]) -> Response:
+    expected_platform = Platform.ios if file_type == "ipa" else Platform.ios
+    get_asserted_platform(upload_id, expected_platform=expected_platform)
 
-    app_ipa_file_content = load_app_file(id)
-    build_info = load_build_info(id)
+    build_info = load_build_info(upload_id)
+    app_file_content = load_app_file(build_info)
 
-    created_at = build_info.created_at.strftime("%Y-%m-%d_%H-%M-%S")
-    file_name = f"{build_info.app_info.app_title} {build_info.app_info.bundle_version} {created_at}"
+    created_at_prefix = (
+        build_info.created_at.strftime("%Y-%m-%d_%H-%M-%S") if build_info.created_at else ""
+    )
+    file_name = f"{build_info.app_title} {build_info.bundle_version}{created_at_prefix}"
 
     return Response(
-        content=app_ipa_file_content,
+        content=app_file_content,
         media_type="application/octet-stream",
         headers={"Content-Disposition": f"attachment; filename={file_name}.{file_type}"},
     )
-
-
-@router.get(
-    "/{bundle_id}/latest",
-    response_class=HTMLResponse,
-    tags=["Static page handling"],
-)
-async def get_latest_installation_page(
-    bundle_id: str,
-    request: Request,
-) -> HTMLResponse:
-    build_id = await load_latest_build_id(bundle_id)
-    return await get_item_installation_page(request, build_id)
-
-
-async def load_latest_build_id(bundle_id: str) -> str:
-    all_builds = list_all_build_info()
-    all_builds = list(filter(lambda x: x.app_info.bundle_id == bundle_id, all_builds))
-    all_builds.sort(key=lambda x: x.created_at)
-    if not all_builds:
-        raise NotFoundError()
-    return all_builds[-1].build_id
 
 
 @router.get(
