@@ -12,10 +12,10 @@ or clients.
 We wrote a blog post about this project, it explains the 'Why' and has a walkthrough on how to
 use/deploy it (more 'How-to' style): [How to distribute iOS IPA builds][blog post].
 
-The project provides a single endpoint for uploading an `.ipa/.apk` build. It returns a publicly
-accessible, minimalistic installation page with a QR code - that simple. It is designed for easy
-deployment within your infrastructure via a Docker container. And the upload functionality is
-secured with a pre-shared authorization token (see "Configuration" below).
+The project provides a single endpoint for uploading an `.ipa` or `.apk` build. It returns a
+publicly accessible, minimalistic installation page with a QR code - that simple. It is designed
+for easy deployment within your infrastructure via a Docker container. And the upload functionality
+is secured with a pre-shared authorization token (see "Configuration" below).
 
 To maintain simplicity and focus, this project **does not** handle device ID registration or
 application building.
@@ -27,11 +27,11 @@ To run with Docker:
 ```sh
 docker run \
   -p 8000:8000 \
-  -v builds:/builds \
-  -it ghcr.io/significa/ipa-app-distribution-server
+  -v ./uploads:/uploads \
+  ghcr.io/significa/ipa-app-distribution-server
 ```
 
-To upload your first iOS/Android app build (`your-app-build.ipa` or `your-app-build.apk` in the working directory):
+To upload your built iOS or Android just run:
 
 ```
 curl -X "POST" \
@@ -42,21 +42,23 @@ curl -X "POST" \
   -F "app_file=@your-app-build.ipa"
 ```
 
+Where `your-app-build.ipa` is your iOS IPA build or Android APK (ex: `your-app-build.apk`).
+
 This will return a link to the installation page.
 
 More documentation in the Swagger OpenAPI explorer available on `/docs`.
 
 ## Configuration
 
-- `UPLOAD_SECRET_AUTH_TOKEN`: Token used for upload builds. PLEASE CHANGE IT!
+- `UPLOAD_SECRET_AUTH_TOKEN`: Token used to upload builds. **Don't forget to change it!**
   Default: `secret`.
 
 - `APP_BASE_URL`: The front-facing app URL for link generation.
   Defaults to `http://localhost:8000`.
 
 - `STORAGE_URL`: A [PyFilesystem2](https://github.com/PyFilesystem/pyfilesystem2) compatible URL.
-  Defaults to `osfs:///builds` for Docker installations, and `osfs://./builds` when running
-  directly with Python. This means `/builds` and `./builds` respectively.  
+  Defaults to `osfs:///uploads` for Docker installations, and `osfs://./uploads` when running
+  directly with Python. This means `/uploads` and `./uploads` respectively.  
 
   Compatible with many storage backends. Check out the possible configurations in the
   [index of filesystems](https://www.pyfilesystem.org/page/index-of-filesystems/).

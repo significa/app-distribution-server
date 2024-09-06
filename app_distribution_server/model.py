@@ -1,9 +1,13 @@
+import os
 import plistlib
+import shutil
+import tempfile
 import zipfile
 from datetime import datetime
 from enum import Enum
 from io import BytesIO
 
+from androguard.core.apk import get_apkid
 from pydantic import BaseModel
 
 from app_distribution_server.errors import InvalidFileTypeError
@@ -22,31 +26,32 @@ class AppInfo(BaseModel):
         if self.file_size is None:
             return None
 
-        size = None
         if self.file_size < one_kb:
-            size = f"{self.file_size}B"
-        elif self.file_size < one_kb * one_kb:
-            size = f"{self.file_size / one_kb:.2f}KB"
-        elif self.file_size < one_kb * one_kb * one_kb:
-            size = f"{self.file_size / one_kb / one_kb:.2f}MB"
-        else:
-            size = f"{self.file_size / one_kb / one_kb / one_kb:.2f}GB"
-        return size
+            return f"{self.file_size}B"
+
+        if self.file_size < one_kb**2:
+            return f"{self.file_size / one_kb:.2f}KB"
+
+        if self.file_size < one_kb**3:
+            return f"{self.file_size / one_kb**2:.2f}MB"
+
+        return f"{self.file_size / one_kb**3:.2f}GB"
+
+
+class Platform(str, Enum):
+    ios = "ios"
+    android = "android"
+
+    @property
+    def display_name(self):
+        match = {
+            self.ios: "iOS",
+            self.android: "Android",
+        }
+        return match.get(self)
 
 
 class BuildInfo(BaseModel):
-    class Platform(str, Enum):
-        ios = "ios"
-        android = "android"
-
-        @property
-        def display_name(self):
-            match = {
-                self.ios: "iOS",
-                self.android: "Android",
-            }
-            return match.get(self)
-
     build_id: str
     created_at: datetime
     app_info: AppInfo
@@ -54,9 +59,9 @@ class BuildInfo(BaseModel):
     @property
     def platform(self) -> Platform:
         if self.build_id.startswith("ios"):
-            return BuildInfo.Platform.ios
+            return Platform.ios
         if self.build_id.startswith("android"):
-            return BuildInfo.Platform.android
+            return Platform.android
         raise ValueError("Unknown platform")
 
 
@@ -95,22 +100,21 @@ def extract_ipa_info(ipa_file: BytesIO) -> AppInfo:
 
 
 def extract_android_app_info(apk_file: BytesIO) -> AppInfo:
-    # use aapt2 dump badging to get app info
-    import os
-    import shutil
-    import tempfile
-
-    from aapt2 import aapt
-
     tempdir = tempfile.mkdtemp()
+    file_name = "app.apk"
+    file_path = os.path.join(tempdir, file_name)
+
     try:
-        with open(os.path.join(tempdir, "app.apk"), "wb") as f:
+        with open(file_path, "wb") as f:
             f.write(apk_file.read())
-        apk_info = aapt.get_apk_info(os.path.join(tempdir, "app.apk"))
+
+        bundle_id, _, version_name = get_apkid(file_path)
+
         return AppInfo(
-            app_title=apk_info["app_name"],
-            bundle_id=apk_info["package_name"],
-            bundle_version=apk_info["version_name"],
+            # TODO: How do we retrieve the app_title?
+            app_title=bundle_id,
+            bundle_id=bundle_id,
+            bundle_version=version_name,
             file_size=apk_file.getbuffer().nbytes,
         )
     finally:

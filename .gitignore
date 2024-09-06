@@ -1,6 +1,11 @@
 venv
 .venv
 .env
+
 uploads
-builds
+
 *.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+*.so

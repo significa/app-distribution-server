@@ -17,11 +17,14 @@ def create_parent_directories(build_id: str):
     filesystem.makedirs(build_id, recreate=True)
 
 
-def build_exists(build_id: str) -> bool:
+def get_file_name(build_id: str) -> str:
     is_ios = build_id.startswith("ios-")
-    file_name = IPA_FILE_NAME if is_ios else APK_FILE_NAME
+    return IPA_FILE_NAME if is_ios else APK_FILE_NAME
+
+
+def build_exists(build_id: str) -> bool:
     return (
-        filesystem.exists(f"{build_id}/{file_name}")  # fmt: skip
+        filesystem.exists(f"{build_id}/{get_file_name(build_id)}")  # fmt: skip
         and filesystem.exists(f"{build_id}/{BUILD_INFO_JSON_FILE_NAME}")
     )
 
@@ -51,18 +54,14 @@ def load_build_info(build_id: str) -> BuildInfo:
 
 
 def save_app_file(build_id: str, app_file):
-    is_ios = build_id.startswith("ios-")
-    file_name = IPA_FILE_NAME if is_ios else APK_FILE_NAME
-    app_file_path = f"{build_id}/{file_name}"
+    app_file_path = f"{build_id}/{get_file_name(build_id)}"
 
     with filesystem.open(app_file_path, "wb+") as writable_app_file:
         writable_app_file.write(app_file)
 
 
 def load_app_file(build_id: str) -> bytes:
-    is_ios = build_id.startswith("ios-")
-    file_name = IPA_FILE_NAME if is_ios else APK_FILE_NAME
-    filepath = f"{build_id}/{file_name}"
+    filepath = f"{build_id}/{get_file_name(build_id)}"
 
     with filesystem.open(filepath, "rb") as app_file:
         return app_file.read()

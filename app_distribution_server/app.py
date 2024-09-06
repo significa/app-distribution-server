@@ -14,5 +14,5 @@ app = FastAPI(
     description="[Source code, issues and documentation](https://github.com/significa/ios-ipa-app-distribution)",
 )
 
-app.mount("/static_files", StaticFiles(directory="static_files"), name="static_files")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(router)

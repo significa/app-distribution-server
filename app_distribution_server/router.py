@@ -19,7 +19,12 @@ from app_distribution_server.errors import (
     NotFoundError,
     UnauthorizedError,
 )
-from app_distribution_server.model import BuildInfo, extract_android_app_info, extract_ipa_info
+from app_distribution_server.model import (
+    BuildInfo,
+    Platform,
+    extract_android_app_info,
+    extract_ipa_info,
+)
 from app_distribution_server.qrcode import get_qr_code_svg
 from app_distribution_server.storage import (
     build_exists,
@@ -65,21 +70,26 @@ async def upload_app(
     if not secrets.compare_digest(x_auth_token, UPLOAD_SECRET_AUTH_TOKEN):
         raise UnauthorizedError()
 
-    allowed_file_types = [".ipa", ".apk"]
-    if app_file.filename is None or not any(
-        app_file.filename.endswith(file_type) for file_type in allowed_file_types
-    ):
+    platform: Platform
+
+    if app_file.filename is None:
         raise InvalidFileTypeError()
 
-    is_ios = app_file.filename.endswith(".ipa")
-    prifix = "ios" if is_ios else "android"
-    build_id = f"{prifix}-{uuid4()}"
+    if app_file.filename.endswith(".ipa"):
+        platform = Platform.ios
 
+    elif app_file.filename.endswith(".apk"):
+        platform = Platform.android
+
+    else:
+        raise InvalidFileTypeError()
+
+    build_id = f"{platform.value}-{uuid4()}"
     logger.debug(f"Starting upload {build_id!r}")
 
     app_file_content = app_file.file.read()
 
-    if is_ios:
+    if platform == Platform.ios:
         app_info = extract_ipa_info(io.BytesIO(app_file_content))
     else:
         app_info = extract_android_app_info(io.BytesIO(app_file_content))
@@ -121,13 +131,7 @@ async def get_item_installation_page(
         install_url = get_absolute_url(f"/get/{id}/app.apk")
 
     build_info = load_build_info(id)
-    local_tz = build_info.created_at.astimezone().tzinfo
-    create_at = build_info.created_at.astimezone(local_tz).strftime("%Y-%m-%d %H:%M:%S")
     app_info = build_info.app_info
-    if not LOGO_URL:
-        logo_url = get_absolute_url("/static_files/logo.svg")
-    else:
-        logo_url = LOGO_URL
 
     return templates.TemplateResponse(
         request=request,
@@ -135,12 +139,12 @@ async def get_item_installation_page(
         context={
             "page_title": f"{app_info.app_title} @{app_info.bundle_version} - {APP_TITLE}",
             "app_title": app_info.app_title,
-            "create_at": create_at,
+            "created_at": build_info.created_at,
             "bundle_id": app_info.bundle_id,
             "bundle_version": app_info.bundle_version,
             "install_url": install_url,
             "qr_code_svg": get_qr_code_svg(install_url),
-            "logo_url": logo_url,
+            "logo_url": LOGO_URL,
             "file_size": app_info.display_file_size,
             "platform": build_info.platform.display_name,
         },
@@ -188,12 +192,9 @@ async def get_app_file(
 
     app_ipa_file_content = load_app_file(id)
     build_info = load_build_info(id)
-    build_info = load_build_info(id)
-    local_tz = build_info.created_at.astimezone().tzinfo
-    create_at = build_info.created_at.astimezone(local_tz).strftime("%Y-%m-%d %H:%M:%S")
-    file_name = (
-        f"{build_info.app_info.app_title} {build_info.app_info.bundle_version} - {create_at}"
-    )
+
+    created_at = build_info.created_at.strftime("%Y-%m-%d_%H-%M-%S")
+    file_name = f"{build_info.app_info.app_title} {build_info.app_info.bundle_version} {created_at}"
 
     return Response(
         content=app_ipa_file_content,
