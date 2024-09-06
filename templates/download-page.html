@@ -116,11 +116,13 @@
 
   <body>
     <main>
-      <h1>{{app_title}}</h1>
-      <pre>{{platform}}</pre>
-      <pre>{{bundle_version}}</pre>
-      <pre>{{file_size}}</pre>
-      <time datetime="{{created_at}}">{{created_at}}</time>
+      <h1>{{ build_info.app_title }}</h1>
+      <pre>{{ build_info.platform }}</pre>
+      <pre>{{ build_info.bundle_version }}</pre>
+      <pre>{{ build_info.human_file_size }}</pre>
+      {% if build_info.created_at %}
+        <time datetime="{{ build_info.created_at }}">{{ build_info.created_at }}</time>
+      {% endif %}
 
       <div class="card">
         <div class="qr">

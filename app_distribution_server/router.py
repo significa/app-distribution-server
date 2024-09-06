@@ -178,7 +178,7 @@ async def get_item_plist(
     tags=["Static page handling"],
 )
 async def get_app_file(upload_id: str, file_type: Literal["ipa", "apk"]) -> Response:
-    expected_platform = Platform.ios if file_type == "ipa" else Platform.ios
+    expected_platform = Platform.ios if file_type == "ipa" else Platform.android
     get_asserted_platform(upload_id, expected_platform=expected_platform)
 
     build_info = load_build_info(upload_id)
