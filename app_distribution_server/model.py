@@ -7,7 +7,7 @@ from datetime import datetime
 from enum import Enum
 from io import BytesIO
 
-from androguard.core.apk import get_apkid
+from androguard.core.apk import APK, get_apkid
 from pydantic import BaseModel
 
 from app_distribution_server.errors import InvalidFileTypeError
@@ -109,10 +109,11 @@ def extract_android_app_info(apk_file: BytesIO) -> AppInfo:
             f.write(apk_file.read())
 
         bundle_id, _, version_name = get_apkid(file_path)
+        apk = APK(file_path)
+        app_title = apk.get_app_name()
 
         return AppInfo(
-            # TODO: How do we retrieve the app_title?
-            app_title=bundle_id,
+            app_title=app_title,
             bundle_id=bundle_id,
             bundle_version=version_name,
             file_size=apk_file.getbuffer().nbytes,
