@@ -1,6 +1,6 @@
-# Simple iOS IPA App Distribution Server
+# Simple iOS/Android App Distribution Server
 
-This is a simple, self-hosted IPA app distribution server.
+This is a simple, self-hosted iOS/Android app distribution server.
 
 ![Site and usage Preview](images/preview.png)
 
@@ -12,10 +12,10 @@ or clients.
 We wrote a blog post about this project, it explains the 'Why' and has a walkthrough on how to
 use/deploy it (more 'How-to' style): [How to distribute iOS IPA builds][blog post].
 
-The project provides a single endpoint for uploading an `.ipa` build. It returns a publicly
-accessible, minimalistic installation page with a QR code - that simple. It is designed for easy
-deployment within your infrastructure via a Docker container. And the upload functionality is
-secured with a pre-shared authorization token (see "Configuration" below).
+The project provides a single endpoint for uploading an `.ipa` or `.apk` build. It returns a
+publicly accessible, minimalistic installation page with a QR code - that simple. It is designed
+for easy deployment within your infrastructure via a Docker container. And the upload functionality
+is secured with a pre-shared authorization token (see "Configuration" below).
 
 To maintain simplicity and focus, this project **does not** handle device ID registration or
 application building.
@@ -27,11 +27,11 @@ To run with Docker:
 ```sh
 docker run \
   -p 8000:8000 \
-  -v ipa-uploads:/uploads \
-  -it ghcr.io/significa/ipa-app-distribution-server
+  -v ./uploads:/uploads \
+  ghcr.io/significa/ipa-app-distribution-server
 ```
 
-To upload your first IPA app build (`your-app-build.ipa` in the working directory):
+To upload your built iOS or Android just run:
 
 ```
 curl -X "POST" \
@@ -39,8 +39,10 @@ curl -X "POST" \
   -H "Accept: application/json" \
   -H "X-Auth-Token: secret" \
   -H "Content-Type: multipart/form-data" \
-  -F "ipa_file=@your-app-build.ipa"
+  -F "app_file=@your-app-build.ipa"
 ```
+
+Where `your-app-build.ipa` is your iOS IPA build or Android APK (ex: `your-app-build.apk`).
 
 This will return a link to the installation page.
 
@@ -48,7 +50,7 @@ More documentation in the Swagger OpenAPI explorer available on `/docs`.
 
 ## Configuration
 
-- `UPLOADS_SECRET_AUTH_TOKEN`: Token used for uploads. PLEASE CHANGE IT!
+- `UPLOAD_SECRET_AUTH_TOKEN`: Token used to upload builds. **Don't forget to change it!**
   Default: `secret`.
 
 - `APP_BASE_URL`: The front-facing app URL for link generation.

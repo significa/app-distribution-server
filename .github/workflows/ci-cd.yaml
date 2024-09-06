@@ -36,4 +36,4 @@ jobs:
       packages: write
     uses: significa/actions/.github/workflows/docker-image.yaml@main
     with:
-      image_name: ipa-app-distribution-server
+      image_name: app-distribution-server
