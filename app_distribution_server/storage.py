@@ -2,8 +2,8 @@ import json
 
 from fs import errors, open_fs, path
 
+from app_distribution_server.build_info import BuildInfo, LegacyAppInfo, Platform
 from app_distribution_server.config import STORAGE_URL
-from app_distribution_server.mobile_builds import BuildInfo, LegacyAppInfo, Platform
 
 PLIST_FILE_NAME = "info.plist"
 
@@ -55,12 +55,14 @@ def migrate_legacy_app_info(upload_id: str) -> BuildInfo:
         legacy_info_json = json.load(app_info_file)
         legacy_app_info = LegacyAppInfo.model_validate(legacy_info_json)
 
+    file_size = filesystem.getsize(path.join(upload_id, IPA_FILE_NAME))
+
     build_info = BuildInfo(
         app_title=legacy_app_info.app_title,
         bundle_id=legacy_app_info.bundle_id,
         bundle_version=legacy_app_info.bundle_version,
         upload_id=upload_id,
-        file_size=0,
+        file_size=file_size,
         created_at=None,
         platform=Platform.ios,
     )
