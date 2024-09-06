@@ -11,7 +11,7 @@ app = FastAPI(
     title=APP_TITLE,
     version=APP_VERSION,
     summary="Simple, self-hosted iOS/Android app distribution server.",
-    description="[Source code, issues and documentation](https://github.com/significa/ios-ipa-app-distribution)",
+    description="[Source code, issues and documentation](https://github.com/significa/app-distribution)",
 )
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

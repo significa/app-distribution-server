@@ -30,6 +30,11 @@ class Platform(str, Enum):
 
 
 class LegacyAppInfo(BaseModel):
+    """
+    This was the structure used by v1
+    We perform a migration from the old filesystem, therefore we keep this unchanged.
+    """
+
     app_title: str
     bundle_id: str
     bundle_version: str
@@ -44,7 +49,7 @@ class BuildInfo(LegacyAppInfo):
     @property
     def human_file_size(self) -> str:
         one_kb = 1024
-        if self.file_size is None or self.file_size == 0:
+        if self.file_size is None:
             return "unknown size"
 
         if self.file_size < one_kb:

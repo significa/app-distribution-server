@@ -6,20 +6,20 @@ from fastapi import APIRouter, File, Header, Request, Response, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from app_distribution_server.build_info import (
+    Platform,
+    get_build_info,
+)
 from app_distribution_server.config import (
     APP_BASE_URL,
     APP_TITLE,
     LOGO_URL,
-    UPLOAD_SECRET_AUTH_TOKEN,
+    UPLOADS_SECRET_AUTH_TOKEN,
 )
 from app_distribution_server.errors import (
     InvalidFileTypeError,
     NotFoundError,
     UnauthorizedError,
-)
-from app_distribution_server.mobile_builds import (
-    Platform,
-    get_build_info,
 )
 from app_distribution_server.qrcode import get_qr_code_svg
 from app_distribution_server.storage import (
@@ -75,7 +75,7 @@ async def upload_app(
     app_file: UploadFile = File(),
     x_auth_token: str = Header(),
 ) -> Response:
-    if not secrets.compare_digest(x_auth_token, UPLOAD_SECRET_AUTH_TOKEN):
+    if not secrets.compare_digest(x_auth_token, UPLOADS_SECRET_AUTH_TOKEN):
         raise UnauthorizedError()
 
     platform: Platform
