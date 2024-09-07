@@ -20,10 +20,11 @@
       </div>
     </div>
 
-    <div class="logo">
-        <img src="{{logo_url}}" alt="logo" />
-      
-    </div>
+    {% if logo_url %}
+      <div class="logo">
+          <img src="{{logo_url}}" alt="logo" />
+      </div>
+    {% endif %}
   </main>
   <footer>
     Powered by
