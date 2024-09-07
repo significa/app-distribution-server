@@ -4,6 +4,7 @@ from fs import errors, open_fs, path
 
 from app_distribution_server.build_info import BuildInfo, LegacyAppInfo, Platform
 from app_distribution_server.config import STORAGE_URL
+from app_distribution_server.logger import logger
 
 PLIST_FILE_NAME = "info.plist"
 
@@ -50,6 +51,8 @@ def load_build_info(upload_id: str) -> BuildInfo:
 
 
 def migrate_legacy_app_info(upload_id: str) -> BuildInfo:
+    logger.info(f"Migrating legacy upload {upload_id!r} to v2")
+
     filepath = path.join(upload_id, LEGACY_BUILD_INFO_JSON_FILE_NAME)
     with filesystem.open(filepath, "r") as app_info_file:
         legacy_info_json = json.load(app_info_file)
@@ -68,11 +71,12 @@ def migrate_legacy_app_info(upload_id: str) -> BuildInfo:
     )
 
     save_build_info(build_info)
+    logger.info(f"Successfully migrated legacy upload {upload_id!r} to v2")
 
     return build_info
 
 
-def get_file_path(
+def get_app_file_path(
     build_info: BuildInfo,
 ):
     file_name = IPA_FILE_NAME if build_info.platform == Platform.ios else APK_FILE_NAME
@@ -83,12 +87,21 @@ def save_app_file(
     build_info: BuildInfo,
     app_file: bytes,
 ):
-    with filesystem.open(get_file_path(build_info), "wb+") as writable_app_file:
+    with filesystem.open(get_app_file_path(build_info), "wb+") as writable_app_file:
         writable_app_file.write(app_file)
 
 
 def load_app_file(
     build_info: BuildInfo,
 ) -> bytes:
-    with filesystem.open(get_file_path(build_info), "rb") as app_file:
+    with filesystem.open(get_app_file_path(build_info), "rb") as app_file:
         return app_file.read()
+
+
+def delete_upload(upload_id: str):
+    try:
+        filesystem.removetree(upload_id)
+        logger.info(f"Upload directory {upload_id!r} deleted successfully")
+    except Exception as e:
+        logger.error(f"Failed to delete upload directory {upload_id!r}: {e}")
+        raise

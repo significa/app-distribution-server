@@ -115,33 +115,7 @@
   </head>
 
   <body>
-    <main>
-      <h1>{{ build_info.app_title }}</h1>
-      <pre>{{ build_info.platform }}</pre>
-      <pre>{{ build_info.bundle_version }}</pre>
-      <pre>{{ build_info.human_file_size }}</pre>
-      {% if build_info.created_at %}
-        <time datetime="{{ build_info.created_at }}">{{ build_info.created_at }}</time>
-      {% endif %}
-
-      <div class="card">
-        <div class="qr">
-          {{qr_code_svg|safe}}
-        </div>
-
-        <div class="install">
-          <a href="{{install_url}}">Install</a>
-        </div>
-      </div>
-
-      <div class="logo">
-         <img src="{{logo_url}}" alt="logo" />
-        
-      </div>
-    </main>
+    {% block content %}
+    {% endblock %}
   </body>
-  <footer>
-    Powered by
-    <a href="https://github.com/significa/app-distribution-server">significa/app-distribution-server</a>.
-  </footer>
 </html>
