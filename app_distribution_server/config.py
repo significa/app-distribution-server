@@ -1,6 +1,6 @@
 import os
 
-from ipa_app_distribution_server.logger import logger
+from app_distribution_server.logger import logger
 
 STORAGE_URL = os.getenv("STORAGE_URL", "osfs://./uploads")
 
@@ -16,4 +16,5 @@ if not UPLOADS_SECRET_AUTH_TOKEN:
 
 APP_BASE_URL = os.getenv("APP_BASE_URL", "http://localhost:8000")
 APP_VERSION = os.getenv("APP_VERSION") or "0.0.1-development"
-APP_TITLE = os.getenv("APP_TITLE") or "IOS ipa app distribution server"
+APP_TITLE = os.getenv("APP_TITLE") or "iOS/Android app distribution server"
+LOGO_URL = os.getenv("LOGO_URL", "/static/logo.svg")

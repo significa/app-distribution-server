@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ page_title }}</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #f2f4f6;
+        font-family: system-ui, sans-serif;
+
+        margin: 0;
+        padding: 0;
+      }
+
+      main {
+        height: 100dvh;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .card {
+        display: flex;
+        flex-direction: column;
+
+        background-color: white;
+        padding: 16px;
+        border-radius: 12px;
+        margin-top: 1rem;
+
+        box-shadow:
+          0 1px 2px rgba(0, 0, 0, 0.05),
+          0 2px 4px rgba(0, 0, 0, 0.04),
+          0 8px 16px rgba(0, 0, 0, 0.03);
+      }
+
+      h1 {
+        font-weight: normal;
+        font-size: 1.2rem; 
+        margin: 0.4rem 0;
+      }
+
+      pre, time {
+        display: block;
+        font-family: monospace;
+        margin: 0.2rem 0;
+      }
+
+      .install {
+        margin-top: 16px;
+      }
+
+      .install > a {
+        box-sizing: border-box;
+
+        display: inline-flex;
+        justify-content: center;
+
+        color: inherit;
+        text-decoration: none;
+
+        background-color: black;
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        line-height: 1;
+
+        width: 100%;
+      }
+
+      .logo {
+        margin-top: 16px;
+      }
+      .logo img {
+        width: 78px;
+        height: 32px;
+      }
+
+      footer {
+        font-size: 0.8rem;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        padding: 10px 0;
+        text-align: center;
+        padding: 0.8rem;
+      }
+
+      footer a, footer a:visited {
+        color: black;
+      }
+
+      footer a:hover {
+        opacity: 0.8;
+      }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll("time").forEach(function(datetimeElement) {
+          const isoDate = new Date(datetimeElement.dateTime);
+          const formattedDate = isoDate.toLocaleString();
+          datetimeElement.textContent = formattedDate;
+        })
+      });
+    </script>
+
+  </head>
+
+  <body>
+    {% block content %}
+    {% endblock %}
+  </body>
+</html>

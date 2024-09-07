@@ -1,3 +1,12 @@
 venv
+.venv
+env
 .env
+
 uploads
+
+*.pyc
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
