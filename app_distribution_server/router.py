@@ -73,7 +73,7 @@ def get_asserted_platform(
     summary="Upload an iOS/Android app Build",
 )
 async def upload_app(
-    app_file: UploadFile = File(),
+    app_file: UploadFile = File(description="An `.ipa` or `.apk` build"),
     x_auth_token: str = Header(),
 ) -> Response:
     if not secrets.compare_digest(x_auth_token, UPLOADS_SECRET_AUTH_TOKEN):
@@ -115,7 +115,7 @@ async def upload_app(
 @router.delete(
     "/delete/{upload_id}",
     tags=["API"],
-    summary="Delete an uploaded app build.",
+    summary="Delete an uploaded app build",
 )
 async def delete_app_upload(
     x_auth_token: str = Header(),
@@ -136,7 +136,7 @@ async def delete_app_upload(
     "/get/{upload_id}",
     response_class=HTMLResponse,
     tags=["Front-end page handling"],
-    summary="Render the HTML installation page for the specified item ID.",
+    summary="Render the HTML installation page for the specified item ID",
 )
 async def get_item_installation_page(
     request: Request,
@@ -199,7 +199,10 @@ async def get_item_plist(
     response_class=HTMLResponse,
     tags=["App downloading"],
 )
-async def get_app_file(upload_id: str, file_type: Literal["ipa", "apk"]) -> Response:
+async def get_app_file(
+    upload_id: str,
+    file_type: Literal["ipa", "apk"],
+) -> Response:
     expected_platform = Platform.ios if file_type == "ipa" else Platform.android
     get_asserted_platform(upload_id, expected_platform=expected_platform)
 
