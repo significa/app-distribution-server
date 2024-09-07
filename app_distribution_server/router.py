@@ -1,8 +1,7 @@
 import secrets
 from typing import Literal
-from venv import logger
 
-from fastapi import APIRouter, File, Header, Request, Response, UploadFile
+from fastapi import APIRouter, File, Header, Path, Request, Response, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
@@ -21,9 +20,11 @@ from app_distribution_server.errors import (
     NotFoundError,
     UnauthorizedError,
 )
+from app_distribution_server.logger import logger
 from app_distribution_server.qrcode import get_qr_code_svg
 from app_distribution_server.storage import (
     create_parent_directories,
+    delete_upload,
     get_upload_platform,
     load_app_file,
     load_build_info,
@@ -68,7 +69,7 @@ def get_asserted_platform(
             "description": UnauthorizedError.ERROR_MESSAGE,
         },
     },
-    tags=["Upload API"],
+    tags=["API"],
     summary="Upload an iOS/Android app Build",
 )
 async def upload_app(
@@ -111,10 +112,30 @@ async def upload_app(
     )
 
 
+@router.delete(
+    "/delete/{upload_id}",
+    tags=["API"],
+    summary="Delete an uploaded app build.",
+)
+async def delete_app_upload(
+    x_auth_token: str = Header(),
+    upload_id: str = Path(),
+) -> Response:
+    if not secrets.compare_digest(x_auth_token, UPLOADS_SECRET_AUTH_TOKEN):
+        raise UnauthorizedError()
+
+    get_asserted_platform(upload_id)
+
+    delete_upload(upload_id)
+    logger.info(f"Upload {upload_id!r} deleted successfully")
+
+    return Response(status_code=200, content="Upload deleted successfully")
+
+
 @router.get(
     "/get/{upload_id}",
     response_class=HTMLResponse,
-    tags=["Static page handling"],
+    tags=["Front-end page handling"],
     summary="Render the HTML installation page for the specified item ID.",
 )
 async def get_item_installation_page(
@@ -133,7 +154,7 @@ async def get_item_installation_page(
 
     return templates.TemplateResponse(
         request=request,
-        name="download-page.html",
+        name="download-page.jinja.html",
         context={
             "page_title": f"{build_info.app_title} @{build_info.bundle_version} - {APP_TITLE}",
             "build_info": build_info,
@@ -147,7 +168,7 @@ async def get_item_installation_page(
 @router.get(
     "/get/{upload_id}/app.plist",
     response_class=HTMLResponse,
-    tags=["Static page handling"],
+    tags=["App downloading"],
 )
 async def get_item_plist(
     request: Request,
@@ -163,6 +184,7 @@ async def get_item_plist(
     return templates.TemplateResponse(
         request=request,
         name="plist.xml",
+        media_type="application/xml",
         context={
             "ipa_file_url": get_absolute_url(f"/get/{upload_id}/app.ipa"),
             "app_title": build_info.app_title,
@@ -175,7 +197,7 @@ async def get_item_plist(
 @router.get(
     "/get/{upload_id}/app.{file_type}",
     response_class=HTMLResponse,
-    tags=["Static page handling"],
+    tags=["App downloading"],
 )
 async def get_app_file(upload_id: str, file_type: Literal["ipa", "apk"]) -> Response:
     expected_platform = Platform.ios if file_type == "ipa" else Platform.android
@@ -204,4 +226,15 @@ async def healthz():
     return Response(
         content="OK",
         media_type="text/plain",
+    )
+
+
+async def render_404_page(request: Request, _exception: Exception):
+    return templates.TemplateResponse(
+        request=request,
+        status_code=404,
+        name="404.jinja.html",
+        context={
+            "page_title": "Not Found",
+        },
     )
