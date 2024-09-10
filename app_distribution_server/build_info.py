@@ -1,6 +1,7 @@
 import io
 import os
 import plistlib
+import re
 import shutil
 import tempfile
 import zipfile
@@ -10,7 +11,7 @@ from io import BytesIO
 from uuid import uuid4
 
 from androguard.core.apk import APK, get_apkid
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from app_distribution_server.errors import InvalidFileTypeError
 from app_distribution_server.logger import logger
@@ -26,18 +27,34 @@ class Platform(str, Enum):
             self.ios: "iOS",
             self.android: "Android",
         }
-        return match.get(self)
+        return match[self]
+
+    @property
+    def app_file_name(self):
+        match = {
+            self.ios: "app.ipa",
+            self.android: "app.apk",
+        }
+        return match[self]
 
 
 class LegacyAppInfo(BaseModel):
     """
-    This was the structure used by v1
-    We perform a migration from the old filesystem, therefore we keep this unchanged.
+    This was the structure used by v1.
+    We keep this model unchanged in order to perform the migration from the old app_info.json fle.
     """
 
     app_title: str
     bundle_id: str
     bundle_version: str
+
+    @field_validator("bundle_id")
+    def validate_bundle_id(cls, v):
+        if not re.match(r"^[a-zA-Z0-9\.\-]{1,256}$", v):
+            raise ValueError(
+                "Bundle ID can only contain alphanumeric characters, dots and hyphens."
+            )
+        return v
 
 
 class BuildInfo(LegacyAppInfo):

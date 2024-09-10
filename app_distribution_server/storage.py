@@ -7,12 +7,10 @@ from app_distribution_server.config import STORAGE_URL
 from app_distribution_server.logger import logger
 
 PLIST_FILE_NAME = "info.plist"
-
-IPA_FILE_NAME = "app.ipa"
-APK_FILE_NAME = "app.apk"
-
 BUILD_INFO_JSON_FILE_NAME = "build_info.json"
 LEGACY_BUILD_INFO_JSON_FILE_NAME = "app_info.json"
+INDEXES_DIRECTORY = "_indexes"
+
 
 filesystem = open_fs(STORAGE_URL, create=True)
 
@@ -21,12 +19,17 @@ def create_parent_directories(upload_id: str):
     filesystem.makedirs(upload_id, recreate=True)
 
 
-def get_upload_platform(upload_id: str) -> Platform | None:
-    if filesystem.exists(path.join(upload_id, IPA_FILE_NAME)):
-        return Platform.ios
+def save_upload(build_info: BuildInfo, app_file_content: bytes):
+    create_parent_directories(build_info.upload_id)
+    save_build_info(build_info)
+    save_app_file(build_info, app_file_content)
+    set_latest_build(build_info)
 
-    if filesystem.exists(path.join(upload_id, APK_FILE_NAME)):
-        return Platform.android
+
+def get_upload_platform(upload_id: str) -> Platform | None:
+    for platform in Platform:
+        if filesystem.exists(path.join(upload_id, platform.app_file_name)):
+            return platform
 
     return None
 
@@ -58,7 +61,9 @@ def migrate_legacy_app_info(upload_id: str) -> BuildInfo:
         legacy_info_json = json.load(app_info_file)
         legacy_app_info = LegacyAppInfo.model_validate(legacy_info_json)
 
-    file_size = filesystem.getsize(path.join(upload_id, IPA_FILE_NAME))
+    file_size = filesystem.getsize(
+        path.join(upload_id, Platform.ios.app_file_name),
+    )
 
     build_info = BuildInfo(
         app_title=legacy_app_info.app_title,
@@ -79,8 +84,10 @@ def migrate_legacy_app_info(upload_id: str) -> BuildInfo:
 def get_app_file_path(
     build_info: BuildInfo,
 ):
-    file_name = IPA_FILE_NAME if build_info.platform == Platform.ios else APK_FILE_NAME
-    return path.join(build_info.upload_id, file_name)
+    return path.join(
+        build_info.upload_id,
+        build_info.platform.app_file_name,
+    )
 
 
 def save_app_file(
@@ -105,3 +112,27 @@ def delete_upload(upload_id: str):
     except Exception as e:
         logger.error(f"Failed to delete upload directory {upload_id!r}: {e}")
         raise
+
+
+def get_latest_upload_by_bundle_id_filepath(bundle_id):
+    return path.join(INDEXES_DIRECTORY, "latest_upload_by_bundle_id", f"{bundle_id}.txt")
+
+
+def set_latest_build(build_info: BuildInfo):
+    filepath = get_latest_upload_by_bundle_id_filepath(build_info.bundle_id)
+    filesystem.makedirs(path.dirname(filepath), recreate=True)
+
+    with filesystem.open(filepath, "w") as file:
+        file.write(build_info.upload_id)
+
+
+def get_latest_upload_id_by_bundle_id(bundle_id: str) -> str | None:
+    filepath = get_latest_upload_by_bundle_id_filepath(bundle_id)
+
+    logger.info(f"Retrieving latest upload id from bundle {bundle_id!r} ({filepath!r})")
+
+    if not filesystem.exists(filepath):
+        return None
+
+    with filesystem.open(filepath, "r") as file:
+        return file.readline().strip()
