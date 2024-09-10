@@ -19,3 +19,10 @@ APP_TITLE = os.getenv("APP_TITLE") or "iOS/Android app distribution server"
 
 _raw_logo_url = os.getenv("LOGO_URL", "/static/logo.svg")
 LOGO_URL: str | None = None if _raw_logo_url.lower() in ["", "0", "false"] else _raw_logo_url
+
+
+def get_absolute_url(path: str) -> str:
+    if not path.startswith("/"):
+        path = f"/{path}"
+
+    return f"{APP_BASE_URL}{path}"
