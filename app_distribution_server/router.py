@@ -2,7 +2,7 @@ import secrets
 from typing import Literal
 
 from fastapi import APIRouter, File, Header, Path, Request, Response, UploadFile
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 from fastapi.templating import Jinja2Templates
 
 from app_distribution_server.build_info import (
@@ -23,13 +23,12 @@ from app_distribution_server.errors import (
 from app_distribution_server.logger import logger
 from app_distribution_server.qrcode import get_qr_code_svg
 from app_distribution_server.storage import (
-    create_parent_directories,
     delete_upload,
+    get_latest_upload_id_by_bundle_id,
     get_upload_platform,
     load_app_file,
     load_build_info,
-    save_app_file,
-    save_build_info,
+    save_upload,
 )
 
 router = APIRouter()
@@ -59,6 +58,7 @@ def get_asserted_platform(
     raise NotFoundError()
 
 
+# TODO: Rename to /api/upload
 @router.post(
     "/upload",
     responses={
@@ -72,10 +72,10 @@ def get_asserted_platform(
     tags=["API"],
     summary="Upload an iOS/Android app Build",
 )
-async def upload_app(
+def upload_app(
     app_file: UploadFile = File(description="An `.ipa` or `.apk` build"),
     x_auth_token: str = Header(),
-) -> Response:
+) -> PlainTextResponse:
     if not secrets.compare_digest(x_auth_token, UPLOADS_SECRET_AUTH_TOKEN):
         raise UnauthorizedError()
 
@@ -100,18 +100,16 @@ async def upload_app(
 
     logger.debug(f"Starting upload of {upload_id!r}")
 
-    create_parent_directories(build_info.upload_id)
-    save_build_info(build_info)
-    save_app_file(build_info, app_file_content)
+    save_upload(build_info, app_file_content)
 
-    logger.info(f"Upload {build_info.bundle_id!r} ({upload_id!r}) complete")
+    logger.info(f"Successfully uploaded {build_info.bundle_id!r} ({upload_id!r})")
 
-    return Response(
+    return PlainTextResponse(
         content=get_absolute_url(f"/get/{upload_id}"),
-        media_type="text/plain",
     )
 
 
+# TODO: Rename to /api/delete
 @router.delete(
     "/delete/{upload_id}",
     tags=["API"],
@@ -120,7 +118,7 @@ async def upload_app(
 async def delete_app_upload(
     x_auth_token: str = Header(),
     upload_id: str = Path(),
-) -> Response:
+) -> PlainTextResponse:
     if not secrets.compare_digest(x_auth_token, UPLOADS_SECRET_AUTH_TOKEN):
         raise UnauthorizedError()
 
@@ -129,7 +127,7 @@ async def delete_app_upload(
     delete_upload(upload_id)
     logger.info(f"Upload {upload_id!r} deleted successfully")
 
-    return Response(status_code=200, content="Upload deleted successfully")
+    return PlainTextResponse(status_code=200, content="Upload deleted successfully")
 
 
 @router.get(
@@ -138,7 +136,7 @@ async def delete_app_upload(
     tags=["Front-end page handling"],
     summary="Render the HTML installation page for the specified item ID",
 )
-async def get_item_installation_page(
+async def render_get_item_installation_page(
     request: Request,
     upload_id: str,
 ) -> HTMLResponse:
@@ -166,6 +164,34 @@ async def get_item_installation_page(
 
 
 @router.get(
+    "/api/bundle/{bundle_id}/latest_upload",
+    tags=["API"],
+    summary="Retrieve the latest upload ID from a bundle ID",
+)
+def api_get_latest_upload_is_by_bundle_id(
+    x_auth_token: str = Header(),
+    bundle_id: str = Path(
+        pattern=r"^[a-zA-Z0-9\.\-]{1,256}$",
+    ),
+) -> PlainTextResponse:
+    if not secrets.compare_digest(x_auth_token, UPLOADS_SECRET_AUTH_TOKEN):
+        raise UnauthorizedError()
+
+    upload_id = get_latest_upload_id_by_bundle_id(bundle_id)
+
+    if not upload_id:
+        return PlainTextResponse(
+            status_code=404,
+            content="Not found",
+        )
+
+    return PlainTextResponse(
+        status_code=200,
+        content=upload_id,
+    )
+
+
+@router.get(
     "/get/{upload_id}/app.plist",
     response_class=HTMLResponse,
     tags=["App downloading"],
@@ -186,7 +212,7 @@ async def get_item_plist(
         name="plist.xml",
         media_type="application/xml",
         context={
-            "ipa_file_url": get_absolute_url(f"/get/{upload_id}/app.ipa"),
+            "ipa_file_url": get_absolute_url(f"/get/{upload_id}/{Platform.ios.app_file_name}"),
             "app_title": build_info.app_title,
             "bundle_id": build_info.bundle_id,
             "bundle_version": build_info.bundle_version,
@@ -225,11 +251,8 @@ async def get_app_file(
     "/healthz",
     tags=["Healthz"],
 )
-async def healthz():
-    return Response(
-        content="OK",
-        media_type="text/plain",
-    )
+async def healthz() -> PlainTextResponse:
+    return PlainTextResponse(content="OK")
 
 
 async def render_404_page(request: Request, _exception: Exception):
