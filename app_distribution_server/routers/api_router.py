@@ -27,17 +27,25 @@ from app_distribution_server.storage import (
     save_upload,
 )
 
-router = APIRouter(tags=["API"])
 x_auth_token_dependency = APIKeyHeader(name="X-Auth-Token")
 
 
-def _upload_app(
-    x_auth_token: str,
-    app_file: UploadFile,
-) -> BuildInfo:
+def x_auth_token_validator(
+    x_auth_token: str = Depends(x_auth_token_dependency),
+):
     if not secrets.compare_digest(x_auth_token, UPLOADS_SECRET_AUTH_TOKEN):
         raise UnauthorizedError()
 
+
+router = APIRouter(
+    tags=["API"],
+    dependencies=[Depends(x_auth_token_validator)],
+)
+
+
+def _upload_app(
+    app_file: UploadFile,
+) -> BuildInfo:
     platform: Platform
 
     if app_file.filename is None:
@@ -82,10 +90,9 @@ _upload_route_kwargs = {
 
 @router.post("/upload", **_upload_route_kwargs)
 def _plaintext_post_upload(
-    x_auth_token: str = Depends(x_auth_token_dependency),
     app_file: UploadFile = File(description="An `.ipa` or `.apk` build"),
 ) -> PlainTextResponse:
-    build_info = _upload_app(x_auth_token, app_file)
+    build_info = _upload_app(app_file)
 
     return PlainTextResponse(
         content=get_absolute_url(f"/get/{build_info.upload_id}"),
@@ -94,19 +101,14 @@ def _plaintext_post_upload(
 
 @router.post("/api/upload", **_upload_route_kwargs)
 def _json_api_post_upload(
-    x_auth_token: str = Depends(x_auth_token_dependency),
     app_file: UploadFile = File(description="An `.ipa` or `.apk` build"),
 ) -> BuildInfo:
-    return _upload_app(x_auth_token, app_file)
+    return _upload_app(app_file)
 
 
 async def _api_delete_app_upload(
-    x_auth_token: str = Depends(x_auth_token_dependency),
     upload_id: str = Path(),
 ) -> PlainTextResponse:
-    if not secrets.compare_digest(x_auth_token, UPLOADS_SECRET_AUTH_TOKEN):
-        raise UnauthorizedError()
-
     get_upload_asserted_platform(upload_id)
 
     delete_upload(upload_id)
@@ -134,14 +136,10 @@ router.delete(
     summary="Retrieve the latest upload from a bundle ID",
 )
 def api_get_latest_upload_by_bundle_id(
-    x_auth_token: str = Depends(x_auth_token_dependency),
     bundle_id: str = Path(
         pattern=r"^[a-zA-Z0-9\.\-]{1,256}$",
     ),
 ) -> BuildInfo:
-    if not secrets.compare_digest(x_auth_token, UPLOADS_SECRET_AUTH_TOKEN):
-        raise UnauthorizedError()
-
     upload_id = get_latest_upload_id_by_bundle_id(bundle_id)
 
     if not upload_id:
