@@ -1,5 +1,5 @@
 androguard==4.1.2
-fastapi==0.113.0
+fastapi==0.114.1
 fs-s3fs==1.1.1
 fs==2.4.16
 jinja2==3.1.4

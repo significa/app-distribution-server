@@ -4,6 +4,7 @@ from fs import errors, open_fs, path
 
 from app_distribution_server.build_info import BuildInfo, LegacyAppInfo, Platform
 from app_distribution_server.config import STORAGE_URL
+from app_distribution_server.errors import NotFoundError
 from app_distribution_server.logger import logger
 
 PLIST_FILE_NAME = "info.plist"
@@ -34,12 +35,32 @@ def get_upload_platform(upload_id: str) -> Platform | None:
     return None
 
 
+def get_upload_asserted_platform(
+    upload_id: str,
+    expected_platform: Platform | None = None,
+) -> Platform:
+    upload_platform = get_upload_platform(upload_id)
+
+    if upload_platform is None:
+        raise NotFoundError()
+
+    if expected_platform is None:
+        return upload_platform
+
+    if upload_platform == expected_platform:
+        return upload_platform
+
+    raise NotFoundError()
+
+
 def save_build_info(build_info: BuildInfo):
     upload_id = build_info.upload_id
     filepath = f"{upload_id}/{BUILD_INFO_JSON_FILE_NAME}"
 
     with filesystem.open(filepath, "w") as app_info_file:
-        app_info_file.write(build_info.model_dump_json())
+        app_info_file.write(
+            build_info.model_dump_json(indent=2),
+        )
 
 
 def load_build_info(upload_id: str) -> BuildInfo:

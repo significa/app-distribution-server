@@ -3,7 +3,7 @@
 {% block content %}
   <main>
     <h1>{{ build_info.app_title }}</h1>
-    <pre>{{ build_info.platform }}</pre>
+    <pre>{{ build_info.platform.display_name }}</pre>
     <pre>{{ build_info.bundle_version }}</pre>
     <pre>{{ build_info.human_file_size }}</pre>
     {% if build_info.created_at %}
