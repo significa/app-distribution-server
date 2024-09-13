@@ -13,4 +13,6 @@ ARG APP_VERSION
 ENV APP_VERSION=$APP_VERSION
 ENV STORAGE_URL="osfs:///uploads"
 
+EXPOSE 8000
+
 CMD ["uvicorn", "--host=0.0.0.0", "--port=8000", "app_distribution_server.app:app"]
