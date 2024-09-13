@@ -18,9 +18,9 @@ pyproject-hooks==1.1.0
     # via
     #   build
     #   pip-tools
-pyright==1.1.379
+pyright==1.1.380
     # via -r requirements-dev.in
-ruff==0.6.3
+ruff==0.6.5
     # via -r requirements-dev.in
 wheel==0.44.0
     # via pip-tools

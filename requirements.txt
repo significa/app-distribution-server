@@ -24,9 +24,9 @@ asttokens==2.4.1
     # via stack-data
 banal==1.0.6
     # via dataset
-boto3==1.35.14
+boto3==1.35.18
     # via fs-s3fs
-botocore==1.35.14
+botocore==1.35.18
     # via
     #   boto3
     #   s3transfer
@@ -46,7 +46,7 @@ decorator==5.1.1
     # via ipython
 executing==2.1.0
     # via stack-data
-fastapi==0.113.0
+fastapi==0.114.1
     # via -r requirements.in
 fonttools==4.53.1
     # via matplotlib
@@ -112,9 +112,9 @@ ptyprocess==0.7.0
     # via pexpect
 pure-eval==0.2.3
     # via stack-data
-pydantic==2.9.0
+pydantic==2.9.1
     # via fastapi
-pydantic-core==2.23.2
+pydantic-core==2.23.3
     # via pydantic
 pydot==3.0.1
     # via androguard
@@ -152,7 +152,7 @@ sqlalchemy==1.4.54
     #   dataset
 stack-data==0.6.3
     # via ipython
-starlette==0.38.4
+starlette==0.38.5
     # via fastapi
 traitlets==5.14.3
     # via
@@ -164,9 +164,7 @@ typing-extensions==4.12.2
     #   fastapi
     #   pydantic
     #   pydantic-core
-tzdata==2024.1
-    # via pydantic
-urllib3==2.2.2
+urllib3==2.2.3
     # via botocore
 uvicorn==0.30.6
     # via -r requirements.in
