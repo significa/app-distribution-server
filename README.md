@@ -118,3 +118,6 @@ Built by [Significa](https://significa.co)
 
 
 [Blog post]: https://significa.co/blog/how-to-distribute-ios-ipa-builds
+
+[![significa's banner](https://github.com/significa/.github/blob/main/assets/significa-github-banner-small.png)](https://significa.co/)
+
