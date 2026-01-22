@@ -93,7 +93,7 @@ def get_build_info_from_ipa(
 
                 info = plistlib.loads(plist_file_content)
                 bundle_id = info.get("CFBundleIdentifier")
-                app_title = info.get("CFBundleName")
+                app_title = info.get("CFBundleDisplayName")
                 bundle_version = info.get("CFBundleShortVersionString")
 
                 if bundle_id is None or app_title is None or bundle_version is None:

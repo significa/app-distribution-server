@@ -48,7 +48,7 @@ executing==2.1.0
     # via stack-data
 fastapi==0.115.6
     # via -r requirements.in
-fonttools==4.55.3
+fonttools==4.61.0
     # via matplotlib
 frida==16.5.9
     # via androguard
@@ -165,7 +165,7 @@ typing-extensions==4.12.2
     #   fastapi
     #   pydantic
     #   pydantic-core
-urllib3==2.2.3
+urllib3==2.6.0
     # via botocore
 uvicorn==0.34.0
     # via -r requirements.in
