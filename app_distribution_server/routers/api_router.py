@@ -222,6 +222,25 @@ def api_list_all_uploaded_files(
                 "build_info": build_info_dict,
                 "tags": list(getattr(build_info, "tags", []))
             })
+    # Sort by created_at (descending). Be resilient if created_at is missing or unparsable.
+    def _parse_created_at(value):
+        if isinstance(value, datetime.datetime):
+            return value
+        if not value:
+            return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
+        try:
+            return datetime.datetime.fromisoformat(value)
+        except Exception:
+            return datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
+
+    try:
+        result.sort(
+            key=lambda r: _parse_created_at(r.get("build_info", {}).get("created_at")),
+            reverse=True,
+        )
+    except Exception:
+        # In case of any unexpected data shape, fall back to unsorted result
+        pass
     return JSONResponse(result)
 
 class TagCreateRequest(BaseModel):
