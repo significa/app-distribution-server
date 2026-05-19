@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from fs import errors, open_fs, path
 
@@ -20,9 +21,9 @@ def create_parent_directories(upload_id: str):
     filesystem.makedirs(upload_id, recreate=True)
 
 
-def save_upload(build_info: BuildInfo, app_file_content: bytes):
+def save_upload(build_info: BuildInfo, app_file_content: bytes, tags: list[str] = None):
     create_parent_directories(build_info.upload_id)
-    save_build_info(build_info)
+    save_build_info(build_info, tags)
     save_app_file(build_info, app_file_content)
     set_latest_build(build_info)
 
@@ -53,14 +54,17 @@ def get_upload_asserted_platform(
     raise NotFoundError()
 
 
-def save_build_info(build_info: BuildInfo):
+def save_build_info(build_info: BuildInfo, tags: list[str] = None):
     upload_id = build_info.upload_id
     filepath = f"{upload_id}/{BUILD_INFO_JSON_FILE_NAME}"
-
+    data = build_info.model_dump() if hasattr(build_info, "model_dump") else build_info.__dict__.copy()
+    if tags is not None:
+        data["tags"] = sorted(tags)
+    # Convert datetime fields to ISO format
+    if "created_at" in data and isinstance(data["created_at"], datetime.datetime):
+        data["created_at"] = data["created_at"].isoformat()
     with filesystem.open(filepath, "w") as app_info_file:
-        app_info_file.write(
-            build_info.model_dump_json(indent=2),
-        )
+        json.dump(data, app_info_file, indent=2)
 
 
 def load_build_info(upload_id: str) -> BuildInfo:
@@ -68,8 +72,10 @@ def load_build_info(upload_id: str) -> BuildInfo:
         filepath = path.join(upload_id, BUILD_INFO_JSON_FILE_NAME)
         with filesystem.open(filepath, "r") as app_info_file:
             build_info_json = json.load(app_info_file)
-            return BuildInfo.model_validate(build_info_json)
-
+            tags = build_info_json.get("tags", [])
+            build_info = BuildInfo.model_validate(build_info_json)
+            build_info.tags = tags
+            return build_info
     except errors.ResourceNotFound:
         return migrate_legacy_app_info(upload_id)
 
@@ -157,3 +163,75 @@ def get_latest_upload_id_by_bundle_id(bundle_id: str) -> str | None:
 
     with filesystem.open(filepath, "r") as file:
         return file.readline().strip()
+    
+def list_all_uploaded_files():
+    """
+    Returns a list of all files uploaded so far, grouped by upload_id.
+    Example return: { 'upload_id1': ['file1', 'file2'], ... }
+    """
+    uploads = {}
+    for entry in filesystem.scandir("/"):
+        if entry.is_dir and not entry.name.startswith("_"):
+            upload_id = entry.name
+            uploads[upload_id] = filesystem.listdir(upload_id)
+    return uploads
+
+TAGS_FILE_PATH = "_indexes/tags.json"
+
+def load_tags() -> set[str]:
+    if not filesystem.exists(TAGS_FILE_PATH):
+        return set()
+    with filesystem.open(TAGS_FILE_PATH, "r") as f:
+        try:
+            tags = json.load(f)
+            return set(tags)
+        except Exception:
+            return set()
+
+def save_tags(tags: set[str]):
+    filesystem.makedirs(path.dirname(TAGS_FILE_PATH), recreate=True)
+    with filesystem.open(TAGS_FILE_PATH, "w") as f:
+        json.dump(sorted(tags), f)
+
+def add_tag(tag: str):
+    tags = load_tags()
+    if tag in tags:
+        return False
+    tags.add(tag)
+    save_tags(tags)
+    return True
+
+def get_all_tags() -> list[str]:
+    return sorted(load_tags())
+
+def tag_exists(tag: str) -> bool:
+    return tag in load_tags()
+
+def update_tag(old_tag: str, new_tag: str):
+    tags = load_tags()
+    if old_tag not in tags or new_tag in tags:
+        return False
+    tags.remove(old_tag)
+    tags.add(new_tag)
+    save_tags(tags)
+    return True
+
+UPLOAD_TAGS_DIR = "_indexes/upload_tags"
+
+def get_upload_tags_filepath(upload_id: str) -> str:
+    return path.join(UPLOAD_TAGS_DIR, f"{upload_id}.json")
+
+def save_upload_tags(upload_id: str, tags: list[str]):
+    filesystem.makedirs(path.dirname(get_upload_tags_filepath(upload_id)), recreate=True)
+    with filesystem.open(get_upload_tags_filepath(upload_id), "w") as f:
+        json.dump(sorted(tags), f)
+
+def load_upload_tags(upload_id: str) -> list[str]:
+    filepath = get_upload_tags_filepath(upload_id)
+    if not filesystem.exists(filepath):
+        return []
+    with filesystem.open(filepath, "r") as f:
+        try:
+            return json.load(f)
+        except Exception:
+            return []

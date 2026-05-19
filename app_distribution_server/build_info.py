@@ -62,6 +62,7 @@ class BuildInfo(LegacyAppInfo):
     file_size: int
     created_at: datetime | None
     platform: Platform
+    tags: list[str] = []  # Optional tags field, default empty list
 
     @property
     def human_file_size(self) -> str:
