@@ -10,7 +10,7 @@ androguard==4.1.2
     # via -r requirements.in
 annotated-types==0.7.0
     # via pydantic
-anyio==4.7.0
+anyio==4.14.2
     # via starlette
 apkinspector==1.3.2
     # via androguard
@@ -62,7 +62,7 @@ greenlet==3.1.1
     # via sqlalchemy
 h11==0.16.0
     # via uvicorn
-idna==3.10
+idna==3.15
     # via anyio
 ipython==8.30.0
     # via androguard
@@ -80,7 +80,7 @@ loguru==0.7.3
     # via androguard
 lxml==6.1.0
     # via androguard
-mako==1.3.8
+mako==1.4.2
     # via alembic
 markupsafe==3.0.2
     # via
@@ -106,7 +106,7 @@ parso==0.8.4
     # via jedi
 pexpect==4.9.0
     # via ipython
-pillow==12.2.0
+pillow==12.3.0
     # via matplotlib
 prompt-toolkit==3.0.48
     # via ipython
@@ -120,7 +120,7 @@ pydantic-core==2.27.1
     # via pydantic
 pydot==3.0.3
     # via androguard
-pygments==2.18.0
+pygments==2.20.0
     # via
     #   androguard
     #   ipython
@@ -134,7 +134,7 @@ python-dateutil==2.9.0.post0
     # via
     #   botocore
     #   matplotlib
-python-multipart==0.0.27
+python-multipart==0.0.31
     # via -r requirements.in
 pyyaml==6.0.2
     # via androguard
@@ -145,8 +145,6 @@ six==1.17.0
     #   fs
     #   fs-s3fs
     #   python-dateutil
-sniffio==1.3.1
-    # via anyio
 sqlalchemy==1.4.54
     # via
     #   alembic
@@ -165,7 +163,7 @@ typing-extensions==4.12.2
     #   fastapi
     #   pydantic
     #   pydantic-core
-urllib3==2.7.0
+urllib3==2.8.0
     # via botocore
 uvicorn==0.34.0
     # via -r requirements.in
