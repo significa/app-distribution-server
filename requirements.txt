@@ -165,7 +165,7 @@ typing-extensions==4.12.2
     #   fastapi
     #   pydantic
     #   pydantic-core
-urllib3==2.6.3
+urllib3==2.7.0
     # via botocore
 uvicorn==0.34.0
     # via -r requirements.in
