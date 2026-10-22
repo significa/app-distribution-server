@@ -46,6 +46,22 @@ Where `your-app-build.ipa` is your iOS IPA build or Android APK (ex: `your-app-b
 
 This will return a link to the installation page.
 
+Optionally, add a short `release_notes` string (up to 1000 characters) to show on the installation
+page, like a codename or the commit the build came from:
+
+```
+curl -X "POST" \
+  "http://localhost:8000/upload" \
+  -H "Accept: application/json" \
+  -H "X-Auth-Token: secret" \
+  -H "Content-Type: multipart/form-data" \
+  -F "app_file=@your-app-build.ipa" \
+  --form-string "release_notes=$(git log -1 --format='%h %s')"
+```
+
+`--form-string` sends the text as is. With `-F`, curl would read a value starting with `@` or `<`
+from a file and parse `;type=` style options inside it.
+
 More documentation in the Swagger OpenAPI explorer available on `/docs`.
 
 ## Upgrading / migration to v2

@@ -62,6 +62,7 @@ class BuildInfo(LegacyAppInfo):
     file_size: int
     created_at: datetime | None
     platform: Platform
+    release_notes: str | None = None
 
     @property
     def human_file_size(self) -> str:

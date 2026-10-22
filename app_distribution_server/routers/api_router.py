@@ -1,6 +1,7 @@
 import secrets
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Path, UploadFile
+from fastapi import APIRouter, Depends, File, Form, Path, UploadFile
 from fastapi.responses import PlainTextResponse
 from fastapi.security import APIKeyHeader
 
@@ -45,6 +46,7 @@ router = APIRouter(
 
 def _upload_app(
     app_file: UploadFile,
+    release_notes: str | None,
 ) -> BuildInfo:
     platform: Platform
 
@@ -63,6 +65,7 @@ def _upload_app(
     app_file_content = app_file.file.read()
 
     build_info = get_build_info(platform, app_file_content)
+    build_info.release_notes = (release_notes or "").strip() or None
     upload_id = build_info.upload_id
 
     logger.debug(f"Starting upload of {upload_id!r}")
@@ -87,12 +90,21 @@ _upload_route_kwargs = {
     "description": "On swagger UI authenticate in the upper right corner ('Authorize' button).",
 }
 
+ReleaseNotesForm = Annotated[
+    str | None,
+    Form(
+        max_length=1000,
+        description="Optional short note shown on the installation page (ex: a codename or commit)",
+    ),
+]
+
 
 @router.post("/upload", **_upload_route_kwargs)
 def _plaintext_post_upload(
     app_file: UploadFile = File(description="An `.ipa` or `.apk` build"),
+    release_notes: ReleaseNotesForm = None,
 ) -> PlainTextResponse:
-    build_info = _upload_app(app_file)
+    build_info = _upload_app(app_file, release_notes)
 
     return PlainTextResponse(
         content=get_absolute_url(f"/get/{build_info.upload_id}"),
@@ -102,8 +114,9 @@ def _plaintext_post_upload(
 @router.post("/api/upload", **_upload_route_kwargs)
 def _json_api_post_upload(
     app_file: UploadFile = File(description="An `.ipa` or `.apk` build"),
+    release_notes: ReleaseNotesForm = None,
 ) -> BuildInfo:
-    return _upload_app(app_file)
+    return _upload_app(app_file, release_notes)
 
 
 async def _api_delete_app_upload(
